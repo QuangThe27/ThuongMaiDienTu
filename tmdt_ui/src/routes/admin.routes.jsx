@@ -6,6 +6,9 @@ import UserEdit from '../pages/admin/UserEdit';
 import Store from '../pages/admin/Store';
 import StoreCreate from '../pages/admin/StoreCreate';
 import StoreEdit from '../pages/admin/StoreEdit';
+import Category from '../pages/admin/Category';
+import CategoryCreate from '../pages/admin/CategoryCreate';
+import CategoryEdit from '../pages/admin/CategoryEdit';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -45,7 +48,7 @@ const adminRoutes = [
             </AdminLayout>
         ),
     },
-     {
+    {
         path: '/quan-ly/cua-hang',
         element: protect(
             <AdminLayout>
@@ -66,6 +69,30 @@ const adminRoutes = [
         element: protect(
             <AdminLayout>
                 <StoreEdit />
+            </AdminLayout>
+        ),
+    },
+    {
+        path: '/quan-ly/danh-muc',
+        element: protect(
+            <AdminLayout>
+                <Category />
+            </AdminLayout>
+        ),
+    },
+    {
+        path: '/quan-ly/them-danh-muc',
+        element: protect(
+            <AdminLayout>
+                <CategoryCreate />
+            </AdminLayout>
+        ),
+    },
+    {
+        path: '/quan-ly/sua-danh-muc/:id',
+        element: protect(
+            <AdminLayout>
+                <CategoryEdit />
             </AdminLayout>
         ),
     },
