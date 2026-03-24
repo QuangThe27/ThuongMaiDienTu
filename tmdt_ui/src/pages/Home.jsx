@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, ShoppingCart, Plus, Eye } from 'lucide-react';
+import { Search, Plus, Eye } from 'lucide-react';
 import Banner from '../components/Banner';
 import { getProducts } from '../services/productService';
+import { Link } from 'react-router-dom';
 
 function Home() {
     const [products, setProducts] = useState([]);
@@ -97,9 +98,12 @@ function Home() {
                                                     <span className="text-sky-400 font-black text-xl">
                                                         {price} <small className="text-xs uppercase">đ</small>
                                                     </span>
-                                                    <button className="bg-white text-black p-2 hover:bg-sky-500 hover:text-white transition-colors">
+                                                  <Link 
+                                                        to={`/chi-tiet-san-pham/${product.id}`} 
+                                                        className="bg-white text-black p-2 hover:bg-sky-500 hover:text-white transition-colors"
+                                                    >
                                                         <Eye size={20} />
-                                                    </button>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </div>
