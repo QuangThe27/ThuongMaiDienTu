@@ -11,6 +11,12 @@ const getStoreById = async (id) => {
     return store;
 };
 
+const getStoreByUserId = async (userId) => {
+    const store = await StoreModel.findByUserId(userId);
+    if (!store) throw new Error('Tài khoản này chưa đăng ký cửa hàng');
+    return store;
+};
+
 const createStore = async (data, files) => {
     // 1. Kiểm tra User đã có store chưa
     const existingStore = await StoreModel.findByUserId(data.user_id);
@@ -66,4 +72,4 @@ const deleteStoreById = async (id) => {
     return { message: 'Xóa cửa hàng thành công' };
 };
 
-module.exports = { getAllStores, getStoreById, createStore, updateStoreById, deleteStoreById };
+module.exports = { getAllStores, getStoreById, getStoreByUserId, createStore, updateStoreById, deleteStoreById };

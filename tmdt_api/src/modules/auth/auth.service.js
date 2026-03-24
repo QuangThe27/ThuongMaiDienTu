@@ -35,6 +35,7 @@ const login = async (email, password) => {
             email: user.email,
             phone: user.phone,
             address: user.address,
+            avatar: user.avatar,
             role: user.role,
             status: user.status,
         },

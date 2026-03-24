@@ -9,11 +9,17 @@ import StoreEdit from '../pages/admin/StoreEdit';
 import Category from '../pages/admin/Category';
 import CategoryCreate from '../pages/admin/CategoryCreate';
 import CategoryEdit from '../pages/admin/CategoryEdit';
+import Product from '../pages/admin/Product';
+import ProductDetail from '../pages/admin/ProductDetail';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
 // Hàm helper để bọc bảo vệ route 
-const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>;
+const protect = (element) => (
+    <ProtectedRoute allowedRoles={[1]}>
+        {element}
+    </ProtectedRoute>
+);
 
 const adminRoutes = [
     {
@@ -93,6 +99,22 @@ const adminRoutes = [
         element: protect(
             <AdminLayout>
                 <CategoryEdit />
+            </AdminLayout>
+        ),
+    },
+     {
+        path: '/quan-ly/san-pham',
+        element: protect(
+            <AdminLayout>
+                <Product />
+            </AdminLayout>
+        ),
+    },
+      {
+        path: '/quan-ly/chi-tiet-san-pham/:id',
+        element: protect(
+            <AdminLayout>
+                <ProductDetail />
             </AdminLayout>
         ),
     },

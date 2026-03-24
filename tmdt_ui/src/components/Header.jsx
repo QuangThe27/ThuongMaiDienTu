@@ -12,6 +12,8 @@ import {
     History,
     Settings,
     ChevronRight,
+    Store,
+    UserStar,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -121,17 +123,30 @@ function Header() {
                                                     />
                                                     Lịch sử
                                                 </a>
-                                                {(user?.role === 1 || user?.role === 2) && (
+                                                {(user?.role === 1) && (
                                                     <Link
                                                         to="/admin"
                                                         onClick={() => setIsDropdownOpen(false)}
                                                         className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors"
                                                     >
-                                                        <Settings
+                                                        <UserStar
                                                             size={18}
                                                             className="mr-3 opacity-70"
                                                         />
                                                         Quản lý
+                                                    </Link>
+                                                )}
+                                                 {(user?.role === 1 || user?.role === 2) && (
+                                                    <Link
+                                                        to="/seller"
+                                                        onClick={() => setIsDropdownOpen(false)}
+                                                        className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors"
+                                                    >
+                                                        <Store
+                                                            size={18}
+                                                            className="mr-3 opacity-70"
+                                                        />
+                                                        Cửa hàng
                                                     </Link>
                                                 )}
                                                 <button

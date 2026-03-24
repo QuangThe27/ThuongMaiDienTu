@@ -34,7 +34,7 @@ const deleteImage = async (publicId, folderPath) => {
 // Định nghĩa các loại storage cụ thể
 const storageAvatar = createStorage('thuongmai/avatars');
 const storageStore = createStorage('thuongmai/stores');
-const storageProduct = createStorage('thuongmai/prodcuts');
+const storageProduct = createStorage('thuongmai/products');
 const storageReview = createStorage('thuongmai/reviews');
 
 module.exports = {

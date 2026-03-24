@@ -10,6 +10,11 @@ export const getStoreById = async (id) => {
     return response.data;
 };
 
+export const getStoreByUserId = async (userId) => {
+    const response = await apiClient.get(`/stores/user/${userId}`);
+    return response.data;
+};
+
 export const createStore = async (formData) => {
     const response = await apiClient.post('/stores', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }

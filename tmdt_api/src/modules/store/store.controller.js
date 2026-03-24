@@ -18,6 +18,16 @@ const getById = async (req, res) => {
     }
 };
 
+const getByUserId = async (req, res) => {
+    try {
+        const { id } = req.params; // id của user
+        const data = await StoreService.getStoreByUserId(id);
+        res.json({ success: true, data });
+    } catch (error) {
+        res.status(404).json({ success: false, message: error.message });
+    }
+};
+
 const create = async (req, res) => {
     try {
         const result = await StoreService.createStore(req.body, req.files);
@@ -45,4 +55,4 @@ const remove = async (req, res) => {
     }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getByUserId, create, update, remove };

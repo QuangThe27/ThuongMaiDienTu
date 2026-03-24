@@ -8,6 +8,7 @@ const { uploadStore } = require('../config/cloudinary');
 
 router.get('/', authMiddleware, allowStatus(['0']), allowRoles(['1']), StoreController.getAll);
 router.get('/:id', authMiddleware, allowStatus(['0']), allowRoles(['1']), StoreController.getById);
+router.get('/user/:id', authMiddleware, StoreController.getByUserId);
 
 // Cấu hình upload đa file: logo và image_sub
 const uploadFields = uploadStore.fields([
