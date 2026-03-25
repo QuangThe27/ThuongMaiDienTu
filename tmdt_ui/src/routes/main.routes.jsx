@@ -4,6 +4,7 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import ProductDetail from '../pages/ProductDetail';
+import Cart from '../pages/Cart';
 
 const mainRoutes = [
     {
@@ -26,11 +27,19 @@ const mainRoutes = [
         path: '/quen-mat-khau',
         element: <ForgotPassword />,
     },
-     {
+    {
         path: '/chi-tiet-san-pham/:id',
         element: (
             <MainLayout showHeader showFooter>
                 <ProductDetail />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/gio-hang',
+        element: (
+            <MainLayout showHeader showFooter>
+                <Cart />
             </MainLayout>
         ),
     },
