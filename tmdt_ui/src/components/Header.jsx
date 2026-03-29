@@ -108,7 +108,7 @@ function Header() {
                                                 <div className="px-4 py-3 border-b border-gray-100 font-bold text-sky-600 bg-sky-50 truncate flex items-center">
                                                     <User size={16} className="mr-2" /> {user?.name}
                                                 </div>
-                                                <Link to="/lich-su" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">
+                                                <Link to="/lich-su-don-hang" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">
                                                     <History size={18} className="mr-3 opacity-70" /> Lịch sử
                                                 </Link>
                                                 {user?.role === 1 && (

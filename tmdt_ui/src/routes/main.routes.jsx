@@ -5,6 +5,9 @@ import Register from '../pages/auth/Register';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import ProductDetail from '../pages/ProductDetail';
 import Cart from '../pages/Cart';
+import Checkout from '../pages/Checkout';
+import History from '../pages/History';
+import OrderDetail from '../pages/OrderDetail';
 
 const mainRoutes = [
     {
@@ -40,6 +43,30 @@ const mainRoutes = [
         element: (
             <MainLayout showHeader showFooter>
                 <Cart />
+            </MainLayout>
+        ),
+    },
+     {
+        path: '/thanh-toan',
+        element: (
+            <MainLayout showHeader showFooter>
+                <Checkout />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/lich-su-don-hang',
+        element: (
+            <MainLayout showHeader showFooter>
+                <History />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/thong-tin-don-hang/:id',
+        element: (
+            <MainLayout showHeader showFooter>
+                <OrderDetail />
             </MainLayout>
         ),
     },

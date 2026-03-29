@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ShieldCheck, Truck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getCartByUserId, updateCartQuantity, deleteCart } from '../services/cartService';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Cart() {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -159,7 +160,10 @@ function Cart() {
                                     </div>
                                 </div>
                                 
-                                <button className="w-full bg-black text-white py-5 font-black uppercase tracking-[0.2em] hover:bg-sky-600 transition-all flex items-center justify-center space-x-3">
+                                <button 
+                                    onClick={() => navigate('/thanh-toan', { state: { items: cartItems } })}
+                                    className="w-full bg-black text-white py-5 font-black uppercase tracking-[0.2em] hover:bg-sky-600 transition-all flex items-center justify-center space-x-3"
+                                >
                                     <span>Thanh toán ngay</span>
                                     <ArrowRight size={20} />
                                 </button>
