@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AdminHeader from '../../components/AdminHeader';
 import { Edit3, Trash2, Layers, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getCategories, deleteCategory } from '../../services/categoryService';
 import Notification from '../../components/Notification';
+import * as XLSX from 'xlsx';
 
 function Category() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const showNotify = (message, type = 'success') => {
         setNotification({ message, type });
@@ -20,19 +22,37 @@ function Category() {
             try {
                 setLoading(true);
                 const result = await getCategories();
-                setCategories(result.data);
+                setCategories(result.data || []);
             } catch {
-                showNotify('Không thể tải danh sách cửa hàng.', 'error');
+                showNotify('Không thể tải danh sách danh mục.', 'error');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchCategories();
     }, []);
 
+    const filteredCategories = useMemo(() => {
+        return categories.filter(cat =>
+            cat.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [categories, searchTerm]);
+
+    const handleExport = () => {
+        const dataToExport = filteredCategories.map((c, index) => ({
+            "STT": index + 1,
+            "Tên danh mục": c.name,
+            "Trạng thái": c.status === 0 ? "Hoạt động" : "Ngừng",
+            "Ngày tạo": new Date(c.created_at).toLocaleDateString('vi-VN')
+        }));
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Categories");
+        XLSX.writeFile(wb, "Danh_sach_danh_muc.xlsx");
+    };
+
     const handleDelete = async (id, name) => {
-        if (window.confirm(`Xóa danh mục "${name}"? Thao tác này có thể ảnh hưởng đến sản phẩm thuộc danh mục này!`)) {
+        if (window.confirm(`Xóa danh mục "${name}"? Thao tác này có thể ảnh hưởng đến sản phẩm!`)) {
             try {
                 const response = await deleteCategory(id);
                 showNotify(response.message);
@@ -47,7 +67,14 @@ function Category() {
         <div className="animate-fade-in relative">
             {notification && <Notification {...notification} onClose={() => setNotification(null)} />}
 
-            <AdminHeader title="Quản lý Danh mục" searchPlaceholder="Tìm tên danh mục..." createLink="/quan-ly/them-danh-muc" />
+            <AdminHeader 
+                title="Quản lý Danh mục" 
+                searchPlaceholder="Tìm tên danh mục..." 
+                createLink="/quan-ly/them-danh-muc"
+                onSearch={setSearchTerm}
+                showExport={true}
+                onExport={handleExport}
+            />
 
             <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
@@ -64,8 +91,10 @@ function Category() {
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
                                 <tr><td colSpan="5" className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-indigo-500" /></td></tr>
+                            ) : filteredCategories.length === 0 ? (
+                                <tr><td colSpan="5" className="p-10 text-center text-gray-400">Không tìm thấy danh mục.</td></tr>
                             ) : (
-                                categories.map((cat, index) => (
+                                filteredCategories.map((cat, index) => (
                                     <tr key={cat.id} className="hover:bg-indigo-50/30 transition-colors">
                                         <td className="p-4 text-sm text-center text-gray-400 font-medium">{index + 1}</td>
                                         <td className="p-4">

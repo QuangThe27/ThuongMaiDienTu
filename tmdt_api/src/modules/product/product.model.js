@@ -20,6 +20,14 @@ const findAllByStoreId = async (storeId) => {
     return rows;
 };
 
+const findByCategoryId = async (categoryId) => {
+    const [rows] = await db.execute(
+        'SELECT * FROM products WHERE category_id = ? ORDER BY timestamp DESC', 
+        [categoryId]
+    );
+    return rows;
+};
+
 // Các hàm bổ trợ để lấy dữ liệu liên quan
 const findImagesByProductId = async (productId) => {
     const [rows] = await db.execute('SELECT * FROM product_images WHERE product_id = ?', [productId]);
@@ -116,5 +124,6 @@ module.exports = {
     update,
     deleteImagesByProductId,
     deleteDescriptionsByProductId,
-    deleteVariantsByProductId
+    deleteVariantsByProductId,
+    findByCategoryId
 };

@@ -3,7 +3,7 @@ import { Search, Plus, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-function SellerHeader({ onAdd, searchPlaceholder, createLink, subTitle }) {
+function SellerHeader({ onAdd, searchPlaceholder, createLink, subTitle, onSearch }) {
     const { user } = useAuth();
 
     // Lấy cấu hình Cloudinary từ biến môi trường
@@ -54,6 +54,7 @@ function SellerHeader({ onAdd, searchPlaceholder, createLink, subTitle }) {
                     <input
                         type="text"
                         placeholder={searchPlaceholder || 'Tìm sản phẩm, đơn hàng...'}
+                        onChange={(e) => onSearch && onSearch(e.target.value)}
                         className="pl-10 pr-4 py-2.5 bg-white border border-gray-100 rounded-xl shadow-sm focus:ring-2 focus:ring-orange-500 outline-none w-64 transition-all text-sm"
                     />
                 </div>

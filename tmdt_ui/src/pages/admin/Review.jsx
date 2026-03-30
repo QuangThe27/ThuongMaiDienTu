@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AdminHeader from '../../components/AdminHeader';
 import { Trash2, Star, Loader2, MessageSquare, Image as ImageIcon } from 'lucide-react';
 import { getReviews, deleteReview } from '../../services/reviewService';
 import Notification from '../../components/Notification';
+import * as XLSX from 'xlsx';
 
 function Review() {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Lấy URL cơ sở từ env để hiển thị ảnh review
     const CLOUDINARY_REVIEW_URL = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${import.meta.env.VITE_CLOUDINARY_REVIEW}`;
@@ -45,6 +47,37 @@ function Review() {
         }
     };
 
+    // Logic tìm kiếm: Lọc theo tên khách hàng, tên sản phẩm hoặc nội dung đánh giá
+    const filteredReviews = useMemo(() => {
+        return reviews.filter(rev =>
+            rev.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            rev.product_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            rev.content?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [reviews, searchTerm]);
+
+    // Logic xuất Excel
+    const handleExportExcel = () => {
+        try {
+            const dataToExport = filteredReviews.map((rev, index) => ({
+                'STT': index + 1,
+                'Khách hàng': rev.user_name,
+                'Sản phẩm': rev.product_name,
+                'Nội dung': rev.content || 'Không có nội dung',
+                'Số sao': rev.point,
+                'Ngày tạo': new Date(rev.created_at).toLocaleDateString('vi-VN')
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Reviews");
+            XLSX.writeFile(workbook, `Danh_sach_danh_gia_${new Date().getTime()}.xlsx`);
+            showNotify('Xuất file Excel thành công');
+        } catch {
+            showNotify('Lỗi khi xuất file Excel', 'error');
+        }
+    };
+
     return (
         <div className="animate-fade-in relative">
             {notification && <Notification {...notification} onClose={() => setNotification(null)} />}
@@ -52,7 +85,10 @@ function Review() {
             <AdminHeader 
                 title="Quản lý Đánh giá" 
                 searchPlaceholder="Tìm theo nội dung hoặc tên sản phẩm..." 
-                // Review thường không có trang "Thêm mới" thủ công từ Admin nên bỏ createLink hoặc để trống
+                showAdd={false} 
+                showExport={true} 
+                onSearch={(value) => setSearchTerm(value)}
+                onExport={handleExportExcel}
             />
 
             <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
@@ -76,12 +112,14 @@ function Review() {
                                         <Loader2 className="animate-spin mx-auto text-indigo-500" />
                                     </td>
                                 </tr>
-                            ) : reviews.length === 0 ? (
+                            ) : filteredReviews.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="p-10 text-center text-gray-400 font-medium">Chưa có đánh giá nào.</td>
+                                    <td colSpan="7" className="p-10 text-center text-gray-400 font-medium">
+                                        {searchTerm ? "Không tìm thấy đánh giá phù hợp." : "Chưa có đánh giá nào."}
+                                    </td>
                                 </tr>
                             ) : (
-                                reviews.map((rev, index) => (
+                                filteredReviews.map((rev, index) => (
                                     <tr key={rev.id} className="hover:bg-indigo-50/30 transition-colors">
                                         <td className="p-4 text-sm text-center text-gray-400 font-medium">{index + 1}</td>
                                         <td className="p-4">

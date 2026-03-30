@@ -9,6 +9,7 @@ const { uploadProduct } = require('../config/cloudinary');
 router.get('/', ProductController.getAll);
 router.get('/:id', ProductController.getById);
 router.get('/store/:id', ProductController.getByStore);
+router.get('/category/:id', ProductController.getByCategory);
 router.post(
     '/', 
     authMiddleware,

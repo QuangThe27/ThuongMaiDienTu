@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import AdminHeader from '../../components/AdminHeader';
-import { Edit3, Trash2, Store as StoreIcon, Loader2, ExternalLink } from 'lucide-react';
+import { Edit3, Trash2, Store as StoreIcon, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getStores, deleteStore } from '../../services/storeService';
 import Notification from '../../components/Notification';
+import * as XLSX from 'xlsx';
 
 function Store() {
     const [stores, setStores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [notification, setNotification] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const showNotify = (message, type = 'success') => {
         setNotification({ message, type });
@@ -20,16 +22,37 @@ function Store() {
             try {
                 setLoading(true);
                 const result = await getStores();
-                setStores(result.data);
+                setStores(result.data || []);
             } catch {
                 showNotify('Không thể tải danh sách cửa hàng.', 'error');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchStores();
     }, []);
+
+    // Logic Tìm kiếm
+    const filteredStores = useMemo(() => {
+        return stores.filter(store =>
+            store.store_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            store.owner_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [stores, searchTerm]);
+
+    // Logic Xuất Excel
+    const handleExport = () => {
+        const dataToExport = filteredStores.map((s, index) => ({
+            "STT": index + 1,
+            "Tên cửa hàng": s.store_name,
+            "Chủ sở hữu": s.owner_name,
+            "Trạng thái": s.status === 1 ? "Hoạt động" : s.status === 2 ? "Tạm ngưng" : "Đóng cửa"
+        }));
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Stores");
+        XLSX.writeFile(wb, "Danh_sach_cua_hang.xlsx");
+    };
 
     const handleDelete = async (id, name) => {
         if (window.confirm(`Xóa cửa hàng "${name}"? Thao tác này không thể hoàn tác!`)) {
@@ -57,7 +80,14 @@ function Store() {
         <div className="animate-fade-in relative">
             {notification && <Notification {...notification} onClose={() => setNotification(null)} />}
 
-            <AdminHeader title="Quản lý Cửa hàng" searchPlaceholder="Tìm tên cửa hàng..." createLink="/quan-ly/them-cua-hang" />
+            <AdminHeader 
+                title="Quản lý Cửa hàng" 
+                searchPlaceholder="Tìm tên cửa hàng..." 
+                createLink="/quan-ly/them-cua-hang"
+                onSearch={setSearchTerm}
+                showExport={true}
+                onExport={handleExport}
+            />
 
             <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
@@ -74,8 +104,10 @@ function Store() {
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
                                 <tr><td colSpan="5" className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-blue-500" /></td></tr>
+                            ) : filteredStores.length === 0 ? (
+                                <tr><td colSpan="5" className="p-10 text-center text-gray-400">Không tìm thấy cửa hàng nào.</td></tr>
                             ) : (
-                                stores.map((store, index) => (
+                                filteredStores.map((store, index) => (
                                     <tr key={store.id} className="hover:bg-blue-50/30 transition-colors">
                                         <td className="p-4 text-sm text-center text-gray-400">{index + 1}</td>
                                         <td className="p-4">

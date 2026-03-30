@@ -10,6 +10,8 @@ import History from '../pages/History';
 import OrderDetail from '../pages/OrderDetail';
 import Store from '../pages/seller/Store';
 import Settings from '../pages/Settings';
+import ProductsForCategory from '../pages/ProductsForCategory';
+import Support from '../pages/Support';
 
 const mainRoutes = [
     {
@@ -85,6 +87,22 @@ const mainRoutes = [
         element: (
             <MainLayout showHeader showFooter>
                 <Settings />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/san-pham-theo-danh-muc/:id',
+        element: (
+            <MainLayout showHeader showFooter>
+                <ProductsForCategory />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/support',
+        element: (
+            <MainLayout showHeader showFooter>
+                <Support />
             </MainLayout>
         ),
     },

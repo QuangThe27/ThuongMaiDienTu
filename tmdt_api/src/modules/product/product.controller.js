@@ -60,6 +60,24 @@ const getByStore = async (req, res) => {
     }
 };
 
+const getByCategory = async (req, res) => {
+    try {
+        const { id } = req.params; // category_id
+        const products = await ProductService.getProductsByCategory(id);
+
+        res.status(200).json({
+            success: true,
+            data: products
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Lỗi khi lấy sản phẩm theo danh mục",
+            error: error.message
+        });
+    }
+};
+
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
@@ -164,4 +182,4 @@ const updateProduct = async (req, res) => {
     }
 };
 
-module.exports = { getAll, getById, getByStore, deleteProduct, createProduct, updateProduct };
+module.exports = { getAll, getById, getByStore, deleteProduct, createProduct, updateProduct, getByCategory };

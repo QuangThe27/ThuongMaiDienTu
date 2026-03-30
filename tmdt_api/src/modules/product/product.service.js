@@ -47,6 +47,20 @@ const getProductById = async (id) => {
     };
 };
 
+const getProductsByCategory = async (categoryId) => {
+    const products = await ProductModel.findByCategoryId(categoryId);
+    
+    const detailedProducts = await Promise.all(products.map(async (product) => {
+        const [images, variants] = await Promise.all([
+            ProductModel.findImagesByProductId(product.id),
+            ProductModel.findVariantsByProductId(product.id)
+        ]);
+        return { ...product, images, variants };
+    }));
+
+    return detailedProducts;
+};
+
 const deleteProduct = async (id) => {
     const isDeleted = await ProductModel.deleteById(id);
     return isDeleted;
@@ -161,5 +175,6 @@ module.exports = {
     getProductsByStoreId,
     deleteProduct,
     createProduct,
-    updateProduct
+    updateProduct,
+    getProductsByCategory
 };
