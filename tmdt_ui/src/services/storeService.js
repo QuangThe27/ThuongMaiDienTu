@@ -1,4 +1,4 @@
-import apiClient from '../api/axiosInstance';
+import apiClient, { publicClient } from '../api/axiosInstance';
 
 export const getStores = async () => {
     const response = await apiClient.get('/stores');
@@ -6,7 +6,7 @@ export const getStores = async () => {
 };
 
 export const getStoreById = async (id) => {
-    const response = await apiClient.get(`/stores/${id}`);
+    const response = await publicClient.get(`/stores/${id}`);
     return response.data;
 };
 

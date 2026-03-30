@@ -6,9 +6,9 @@ const allowStatus = require('../middlewares/statusAccount.middleware');
 const StoreController = require('../modules/store/store.controller');
 const { uploadStore } = require('../config/cloudinary');
 
-router.get('/', authMiddleware, allowStatus(['0']), allowRoles(['1']), StoreController.getAll);
-router.get('/:id', authMiddleware, allowStatus(['0']), allowRoles(['1']), StoreController.getById);
-router.get('/user/:id', authMiddleware, StoreController.getByUserId);
+router.get('/', StoreController.getAll);
+router.get('/:id', StoreController.getById);
+router.get('/user/:id', StoreController.getByUserId);
 
 // Cấu hình upload đa file: logo và image_sub
 const uploadFields = uploadStore.fields([

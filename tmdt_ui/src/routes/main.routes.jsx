@@ -8,6 +8,8 @@ import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import History from '../pages/History';
 import OrderDetail from '../pages/OrderDetail';
+import Store from '../pages/seller/Store';
+import Settings from '../pages/Settings';
 
 const mainRoutes = [
     {
@@ -67,6 +69,22 @@ const mainRoutes = [
         element: (
             <MainLayout showHeader showFooter>
                 <OrderDetail />
+            </MainLayout>
+        ),
+    },
+     {
+        path: '/cua-hang/:id',
+        element: (
+            <MainLayout showHeader showFooter>
+                <Store />
+            </MainLayout>
+        ),
+    },
+    {
+        path: '/cai-dat',
+        element: (
+            <MainLayout showHeader showFooter>
+                <Settings />
             </MainLayout>
         ),
     },

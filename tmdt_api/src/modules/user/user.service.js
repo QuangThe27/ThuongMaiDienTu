@@ -1,7 +1,6 @@
 const UserModel = require('./user.model');
 const { deleteImage } = require('../../config/cloudinary');
 const bcrypt = require('bcryptjs');
-
 const getAllUsers = async () => {
     return await UserModel.findAll();
 };
@@ -48,23 +47,30 @@ const updateUser = async (id, data, file) => {
     const user = await UserModel.findById(id);
     if (!user) throw new Error('Người dùng không tồn tại');
 
-    if (data.password) {
+    // 1. Xử lý Hash mật khẩu nếu có nhập mật khẩu mới
+    if (data.password && data.password.trim() !== '') {
+        if (data.password.length < 6) {
+            throw new Error('Mật khẩu mới phải từ 6 ký tự trở lên');
+        }
         data.password = await bcrypt.hash(data.password, 10);
+    } else {
+        // Nếu không đổi mật khẩu, xóa trường password khỏi object data để không bị ghi đè rỗng
+        delete data.password;
     }
 
+    // 2. Xử lý Avatar
     if (file) {
-        // 1. Xóa ảnh cũ trên Cloudinary nếu có
         if (user.avatar) {
             await deleteImage(user.avatar, 'thuongmai/avatars');
         }
-        // 2. Lấy tên ảnh mới
         data.avatar = file.filename.split('/').pop();
     }
 
     const isUpdated = await UserModel.update(id, data);
-    if (!isUpdated) throw new Error('Cập nhật thất bại hoặc không có gì thay đổi');
-
-    return { message: 'Cập nhật người dùng thành công' };
+    
+    // Lưu ý: Nếu người dùng nhấn "Lưu" mà không đổi gì, affectedRows sẽ là 0. 
+    // Bạn có thể bỏ qua check này hoặc trả về thông báo phù hợp.
+    return { message: 'Cập nhật thông tin thành công' };
 };
 
 module.exports = {

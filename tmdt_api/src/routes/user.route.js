@@ -12,7 +12,6 @@ router.get(
     '/:id',
     authMiddleware,
     allowStatus(['0']),
-    allowRoles(['1']),
     UserController.getUserById
 );
 
@@ -37,7 +36,6 @@ router.put(
     '/:id',
     authMiddleware,
     allowStatus(['0']),
-    allowRoles(['1']),
     uploadAvatar.single('avatar'),
     UserController.updateUser
 );

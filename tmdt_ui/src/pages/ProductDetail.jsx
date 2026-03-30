@@ -4,7 +4,8 @@ import { ShoppingCart, Heart, Truck, RotateCcw, Minus, Plus, Check, Star, User, 
 import { getProductById } from '../services/productService';
 import { createCart } from '../services/cartService'; 
 import { useAuth } from '../contexts/AuthContext'; 
-import { getReviewsByProductId } from '../services/reviewService'; // Import thêm
+import { getReviewsByProductId } from '../services/reviewService'; 
+import { getStoreById } from '../services/storeService';
 
 function ProductDetail() {
     const { id } = useParams();
@@ -22,9 +23,12 @@ function ProductDetail() {
     const [filterStar, setFilterStar] = useState(0); // 0 = Tất cả
     const [visibleCount, setVisibleCount] = useState(10);
 
+    const [store, setStore] = useState(null);
+
     const CLOUDINARY_PRODUCT = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${import.meta.env.VITE_CLOUDINARY_PRODUCT}`;
     const CLOUDINARY_USER = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${import.meta.env.VITE_CLOUDINARY_AVATAR}`;
     const CLOUDINARY_REVIEW = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${import.meta.env.VITE_CLOUDINARY_REVIEW}`;
+    const CLOUDINARY_STORE = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${import.meta.env.VITE_CLOUDINARY_STORE}`;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,6 +48,9 @@ function ProductDetail() {
                         const lowestLevelVariant = [...data.variants].sort((a, b) => a.level - b.level)[0];
                         setSelectedVariant(lowestLevelVariant);
                     }
+
+                    const storeRes = await getStoreById(data.store_id);
+                    if (storeRes) setStore(storeRes.data);
                 }
 
                 if (reviewRes.success) {
@@ -102,7 +109,7 @@ function ProductDetail() {
         <div className="bg-white min-h-screen pb-20 pt-28">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {/* HÌNH ẢNH (Giữ nguyên UI của bạn) */}
+                    {/* HÌNH ẢNH */}
                     <div className="space-y-6">
                         <div className="aspect-[3/4] overflow-hidden bg-gray-50 border border-gray-100 shadow-sm">
                             <img src={`${CLOUDINARY_PRODUCT}/${mainImage}`} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
@@ -116,7 +123,7 @@ function ProductDetail() {
                         </div>
                     </div>
 
-                    {/* THÔNG TIN (Giữ nguyên UI của bạn) */}
+                    {/* THÔNG TIN */}
                     <div className="flex flex-col">
                         <div className="mb-6">
                             <h1 className="text-4xl font-black text-gray-900 uppercase tracking-tighter mb-2 leading-none">{product.name}</h1>
@@ -183,6 +190,35 @@ function ProductDetail() {
                         </div>
                     </div>
                 </div>
+
+                {store && (
+                    <div className="mt-24 bg-gray-50 border border-gray-100 p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 group">
+                        <div className="flex items-center gap-6">
+                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-4 border-white shadow-xl flex-shrink-0">
+                                <img 
+                                    src={`${CLOUDINARY_STORE}/${store.logo}`} 
+                                    className="w-full h-full object-cover" 
+                                    alt={store.store_name} 
+                                />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black uppercase tracking-tight text-gray-900 group-hover:text-sky-600 transition-colors">
+                                    {store.store_name}
+                                </h3>
+                                <p className="text-gray-500 text-sm font-medium line-clamp-1 max-w-md">{store.description}</p>
+                                <div className="flex gap-4 mt-2">
+                                    <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 uppercase">Đang hoạt động</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => navigate(`/cua-hang/${store.id}`)}
+                            className="w-full md:w-auto px-8 py-4 bg-black text-white font-black uppercase text-xs tracking-widest hover:bg-sky-500 transition-all active:scale-95 shadow-lg"
+                        >
+                            Xem cửa hàng
+                        </button>
+                    </div>
+                )}
 
                 {/* MÔ TẢ (Giữ nguyên) */}
                 <div className="mt-24">

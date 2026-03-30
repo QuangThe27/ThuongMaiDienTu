@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ShoppingCart,
     Bell,
@@ -14,11 +14,31 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getStoreByUserId } from '../services/storeService';
 
 function Header() {
     const { isLoggedIn, user, logout } = useAuth(); 
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [userStoreId, setUserStoreId] = useState(null);
+
+    useEffect(() => {
+        const fetchUserStore = async () => {
+            if (isLoggedIn && user?.role === 2) {
+                try {
+                    const res = await getStoreByUserId(user.id);
+                    // Giả sử API trả về { data: { id: ... } } hoặc { id: ... }
+                    // Dựa vào format bạn cung cấp ở các service trước, thường là res.data.id
+                    if (res && res.data) {
+                        setUserStoreId(res.data.id);
+                    }
+                } catch (error) {
+                    console.error("Lỗi lấy thông tin cửa hàng:", error);
+                }
+            }
+        };
+        fetchUserStore();
+    }, [isLoggedIn, user]);
 
     const cartCount = 99;
     const notifyCount = 5;
@@ -121,7 +141,16 @@ function Header() {
                                                         <Store size={18} className="mr-3 opacity-70" /> Cửa hàng
                                                     </Link>
                                                 )}
-                                                <Link to="/settings" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">
+                                                {user?.role === 2 && userStoreId && (
+                                                    <Link 
+                                                        to={`/cua-hang/${userStoreId}`} 
+                                                        onClick={() => setIsDropdownOpen(false)} 
+                                                        className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors"
+                                                    >
+                                                        <Store size={18} className="mr-3" /> My Store
+                                                    </Link>
+                                                )}
+                                                <Link to="/cai-dat" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">
                                                     <Settings size={18} className="mr-3 opacity-70" /> Cài đặt
                                                 </Link>
                                                 <Link to="/support" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">

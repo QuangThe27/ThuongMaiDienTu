@@ -30,7 +30,6 @@ const create = async (data) => {
 };
 
 const update = async (id, data) => {
-    // Logic cập nhật động: chỉ update những trường có trong data
     const fields = Object.keys(data)
         .map((key) => `${key} = ?`)
         .join(', ');
