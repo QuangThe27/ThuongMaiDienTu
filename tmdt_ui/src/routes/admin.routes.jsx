@@ -11,6 +11,7 @@ import CategoryCreate from '../pages/admin/CategoryCreate';
 import CategoryEdit from '../pages/admin/CategoryEdit';
 import Product from '../pages/admin/Product';
 import ProductDetail from '../pages/admin/ProductDetail';
+import Review from '../pages/admin/Review';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -110,11 +111,19 @@ const adminRoutes = [
             </AdminLayout>
         ),
     },
-      {
+    {
         path: '/quan-ly/chi-tiet-san-pham/:id',
         element: protect(
             <AdminLayout>
                 <ProductDetail />
+            </AdminLayout>
+        ),
+    },
+    {
+        path: '/quan-ly/danh-gia',
+        element: protect(
+            <AdminLayout>
+                <Review />
             </AdminLayout>
         ),
     },

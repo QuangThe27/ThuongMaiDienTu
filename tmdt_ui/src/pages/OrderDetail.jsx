@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrderById } from '../services/orderService';
 import { getProductById } from '../services/productService';
-// Giả định bạn có service review, nếu chưa có hãy tạo sau
-// import { createReview } from '../services/reviewService'; 
+// Import service review đã tạo
+import { createReview } from '../services/reviewService'; 
 import { 
     ChevronLeft, Package, MapPin, Phone, 
     CreditCard, Calendar, Hash, Truck,
@@ -89,14 +89,30 @@ function OrderDetail() {
             alert("Vui lòng nhập cảm nhận của bạn.");
             return;
         }
+
+        const formData = new FormData();
+        // Các ID được lấy từ selectedItem và order
+        formData.append('user_id', order.user_id);
+        formData.append('product_id', selectedItem.product_id);
+        formData.append('orderItem_id', selectedItem.id); // ID của bản ghi trong order_items
+        formData.append('point', rating);
+        formData.append('content', comment);
+
+        // Gắn ảnh vào FormData (key phải khớp với 'images' trong route.post ở backend)
+        images.forEach((file) => {
+            formData.append('images', file);
+        });
+
         setSubmitting(true);
         try {
-            console.log("Gửi đánh giá:", { rating, comment, images });
-            alert("Cảm ơn bạn đã đánh giá sản phẩm!");
+            const res = await createReview(formData);
+            alert(res.message || "Cảm ơn bạn đã đánh giá sản phẩm!");
             setShowReviewModal(false);
+            // Load lại dữ liệu để cập nhật trạng thái isReview trên UI
             fetchDetail(); 
-        } catch {
-            alert("Gửi đánh giá thất bại.");
+        } catch (error) {
+            console.error("Lỗi gửi review:", error);
+            alert(error.response?.data?.message || "Gửi đánh giá thất bại.");
         } finally {
             setSubmitting(false);
         }
@@ -181,14 +197,16 @@ function OrderDetail() {
                                     <p className="font-black text-lg">{(item.price * item.quantity).toLocaleString('vi-VN')}đ</p>
                                 </div>
                                 
-                                {/* NÚT ĐÁNH GIÁ: Hiển thị khi isReview === 1 */}
-                                {item.isReview === 0 && (
+                                {/* NÚT ĐÁNH GIÁ: Chỉ hiển thị khi isReview === 0 */}
+                                {item.isReview === 0 ? (
                                     <button 
                                         onClick={() => openReviewModal(item)}
                                         className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 text-[10px] font-black uppercase hover:bg-black transition-all"
                                     >
                                         <MessageSquare size={14} /> Viết đánh giá
                                     </button>
+                                ) : (
+                                    <span className="text-[10px] font-black uppercase text-green-500 bg-green-50 px-3 py-1">Đã đánh giá</span>
                                 )}
                             </div>
                         </div>

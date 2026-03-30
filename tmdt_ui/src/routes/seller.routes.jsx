@@ -3,6 +3,7 @@ import Dashboard from "../pages/seller/Dashboard";
 import Product from "../pages/seller/Product";
 import ProductCreate from '../pages/seller/ProductCreate';
 import ProductEdit from '../pages/seller/ProductEdit';
+import SellerReview from '../pages/seller/SellerReview';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -38,11 +39,19 @@ const sellerRoutes = [
             </SellerLayout>
         ),
     },
-      {
+    {
         path: '/seller/sua-san-pham/:id',
         element: protectSeller(
             <SellerLayout>
                 <ProductEdit />
+            </SellerLayout>
+        ),
+    },
+    {
+        path: '/seller/danh-gia',
+        element: protectSeller(
+            <SellerLayout>
+                <SellerReview />
             </SellerLayout>
         ),
     },
