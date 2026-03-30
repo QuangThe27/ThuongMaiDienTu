@@ -6,6 +6,7 @@ import { createCart } from '../services/cartService';
 import { useAuth } from '../contexts/AuthContext'; 
 import { getReviewsByProductId } from '../services/reviewService'; 
 import { getStoreById } from '../services/storeService';
+import ChatBox from '../components/ChatBox';
 
 function ProductDetail() {
     const { id } = useParams();
@@ -321,6 +322,16 @@ function ProductDetail() {
                         </div>
                     )}
                 </div>
+
+                {/* PHẦN CHAT BOX MỚI THÊM VÀO */}
+                {isLoggedIn && store && (
+                    <ChatBox 
+                        userId={user.id} 
+                        storeId={store.id} 
+                        storeName={store.store_name}
+                        storeLogo={`${CLOUDINARY_STORE}/${store.logo}`}
+                    />
+                )}
             </div>
         </div>
     );

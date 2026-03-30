@@ -4,6 +4,7 @@ import Product from "../pages/seller/Product";
 import ProductCreate from '../pages/seller/ProductCreate';
 import ProductEdit from '../pages/seller/ProductEdit';
 import SellerReview from '../pages/seller/SellerReview';
+import SellerChat from '../pages/seller/SellerChat';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -52,6 +53,14 @@ const sellerRoutes = [
         element: protectSeller(
             <SellerLayout>
                 <SellerReview />
+            </SellerLayout>
+        ),
+    },
+     {
+        path: '/seller/danh-sach-tin-nhan',
+        element: protectSeller(
+            <SellerLayout>
+                <SellerChat />
             </SellerLayout>
         ),
     },
