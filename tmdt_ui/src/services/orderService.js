@@ -24,3 +24,18 @@ export const deleteOrder = async (id) => {
     const response = await apiClient.delete(`/orders/${id}`);
     return response.data;
 };
+
+export const getOrderStoreById = async (storeId, orderId) => {
+    const response = await apiClient.get(`/orders/store/${storeId}/${orderId}`);
+    return response.data;
+};
+
+export const updateStoreOrderStatus = async (storeId, orderId, status) => {
+    const response = await apiClient.put(`/orders/store/${storeId}/${orderId}/status`, { status });
+    return response.data;
+};
+
+export const getStoreAnalytics = async (storeId) => {
+    const response = await apiClient.get(`/orders/analytics/${storeId}`);
+    return response.data;
+};

@@ -137,7 +137,7 @@ function Header() {
                                                     </Link>
                                                 )}
                                                 {user?.role === 2 && (
-                                                    <Link to="/seller" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">
+                                                    <Link to="/seller/thong-ke" onClick={() => setIsDropdownOpen(false)} className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors">
                                                         <Store size={18} className="mr-3 opacity-70" /> Cửa hàng
                                                     </Link>
                                                 )}

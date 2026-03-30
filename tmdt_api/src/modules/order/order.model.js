@@ -86,4 +86,73 @@ const deleteById = async (id) => {
     return result.affectedRows > 0;
 };
 
-module.exports = { findAll, findById, findByUserId, create, deleteById };
+const findByStoreId = async (orderId, storeId) => {
+    // 1. Lấy thông tin chung của đơn hàng
+    const [orders] = await db.query(
+        'SELECT id, name, address, positioning, phone, total_price, status, created_at FROM orders WHERE id = ?', 
+        [orderId]
+    );
+
+    if (orders.length === 0) return null;
+    const order = orders[0];
+
+    // 2. Lấy các items thuộc store này trong đơn hàng đó
+    const [items] = await db.query(`
+        SELECT 
+            oi.*, 
+            p.name as product_name, 
+            pv.variant_name, 
+            pv.variant_value,
+            p.store_id
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        LEFT JOIN product_variants pv ON oi.variant_id = pv.id
+        WHERE oi.order_id = ? AND p.store_id = ?
+    `, [orderId, storeId]);
+
+    order.items = items;
+    return order;
+};
+
+const updateItemStatus = async (orderId, storeId, status) => {
+    const [result] = await db.query(`
+        UPDATE order_items oi
+        JOIN products p ON oi.product_id = p.id
+        SET oi.status = ?
+        WHERE oi.order_id = ? AND p.store_id = ?
+    `, [status, orderId, storeId]);
+    return result.affectedRows > 0;
+};
+
+// Tính toán doanh thu theo từng trạng thái của 1 Store
+const getRevenueByStore = async (storeId) => {
+    const [rows] = await db.query(`
+        SELECT 
+            oi.status,
+            COUNT(oi.id) as total_orders,
+            SUM(oi.price * oi.quantity) as total_revenue
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE p.store_id = ?
+        GROUP BY oi.status
+    `, [storeId]);
+    return rows;
+};
+
+// Lấy danh sách doanh thu chi tiết từng sản phẩm
+const getProductRevenue = async (storeId) => {
+    const [rows] = await db.query(`
+        SELECT 
+            p.id, p.name,
+            SUM(oi.quantity) as total_sold,
+            SUM(oi.price * oi.quantity) as total_revenue
+        FROM order_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE p.store_id = ? AND oi.status = 2 -- Chỉ tính các đơn đã Hoàn thành
+        GROUP BY p.id
+        ORDER BY total_revenue DESC
+    `, [storeId]);
+    return rows;
+};
+
+module.exports = { findAll, findById, findByUserId, create, deleteById, findByStoreId, updateItemStatus, getRevenueByStore, getProductRevenue };

@@ -1,10 +1,12 @@
 import SellerLayout from '../layouts/SellerLayout';
-import Dashboard from "../pages/seller/Dashboard";
 import Product from "../pages/seller/Product";
 import ProductCreate from '../pages/seller/ProductCreate';
 import ProductEdit from '../pages/seller/ProductEdit';
 import SellerReview from '../pages/seller/SellerReview';
 import SellerChat from '../pages/seller/SellerChat';
+import SellerOrder from '../pages/seller/SellerOrder';
+import SellerOrderDetail from '../pages/seller/SellerOrderDetail';
+import SellerDashboard from '../pages/seller/SellerDashboard';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -16,14 +18,6 @@ const protectSeller = (element) => (
 );
 
 const sellerRoutes = [
-    {
-        path: '/seller',
-        element: protectSeller(
-            <SellerLayout>
-                <Dashboard />
-            </SellerLayout>
-        ),
-    },
     {
         path: '/seller/san-pham',
         element: protectSeller(
@@ -56,11 +50,35 @@ const sellerRoutes = [
             </SellerLayout>
         ),
     },
-     {
+    {
         path: '/seller/danh-sach-tin-nhan',
         element: protectSeller(
             <SellerLayout>
                 <SellerChat />
+            </SellerLayout>
+        ),
+    },
+    {
+        path: '/seller/don-hang',
+        element: protectSeller(
+            <SellerLayout>
+                <SellerOrder />
+            </SellerLayout>
+        ),
+    },
+    {
+        path: '/seller/don-hang/:orderId',
+        element: protectSeller(
+            <SellerLayout>
+                <SellerOrderDetail />
+            </SellerLayout>
+        ),
+    },
+    {
+        path: '/seller/thong-ke',
+        element: protectSeller(
+            <SellerLayout>
+                <SellerDashboard />
             </SellerLayout>
         ),
     },

@@ -13,11 +13,10 @@ import {
 
 function SellerLayout({ children }) {
     const menuItems = [
-        { icon: <LayoutDashboard size={22} />, label: 'Tổng quan', path: '/seller' },
+        { icon: <TrendingUp size={22} />, label: 'Thống Kê', path: '/seller/thong-ke' },
         { icon: <ClipboardList size={22} />, label: 'Đơn hàng', path: '/seller/don-hang' },
         { icon: <Boxes size={22} />, label: 'Kho hàng', path: '/seller/san-pham' },
         { icon: <ShoppingBag size={22} />, label: 'Đánh giá', path: '/seller/danh-gia' },
-        { icon: <TrendingUp size={22} />, label: 'Doanh thu', path: '/seller/bao-cao' },
         { icon: <MessageSquare size={22} />, label: 'Chat', path: '/seller/danh-sach-tin-nhan' },
         { icon: <Settings size={22} />, label: 'Cài đặt', path: '/seller/thiet-lap' },
     ];

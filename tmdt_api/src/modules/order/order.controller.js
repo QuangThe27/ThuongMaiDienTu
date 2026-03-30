@@ -51,4 +51,35 @@ const remove = async (req, res) => {
     }
 };
 
-module.exports = { getAll, getById, getByUserId, create, remove };
+const getForStore = async (req, res) => {
+    try {
+        const { orderId, storeId } = req.params;
+        const data = await OrderService.getOrderStoreById(orderId, storeId);
+        res.status(200).json({ status: 'success', data });
+    } catch (error) {
+        res.status(404).json({ status: 'error', message: error.message });
+    }
+};
+
+const updateStatusForStore = async (req, res) => {
+    try {
+        const { orderId, storeId } = req.params;
+        const { status } = req.body;
+        await OrderService.updateStoreOrderStatus(orderId, storeId, status);
+        res.status(200).json({ status: 'success', message: 'Cập nhật trạng thái thành công.' });
+    } catch (error) {
+        res.status(400).json({ status: 'error', message: error.message });
+    }
+};
+
+const getAnalytics = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        const data = await OrderService.getStoreAnalytics(storeId);
+        res.status(200).json({ status: 'success', data });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+};
+
+module.exports = { getAll, getById, getByUserId, create, remove, getForStore, updateStatusForStore, getAnalytics };

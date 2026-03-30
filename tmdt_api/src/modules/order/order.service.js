@@ -21,4 +21,22 @@ const deleteOrder = async (id) => {
     return success;
 };
 
-module.exports = { getAllOrders, getOrderById, getOrdersByUserId, createOrder, deleteOrder };
+const getOrderStoreById = async (orderId, storeId) => {
+    const order = await OrderModel.findByStoreId(orderId, storeId);
+    if (!order || order.items.length === 0) {
+        throw new Error('Không tìm thấy sản phẩm thuộc cửa hàng này trong đơn hàng.');
+    }
+    return order;
+};
+
+const updateStoreOrderStatus = async (orderId, storeId, status) => {
+    return await OrderModel.updateItemStatus(orderId, storeId, status);
+};
+
+const getStoreAnalytics = async (storeId) => {
+    const overview = await OrderModel.getRevenueByStore(storeId);
+    const products = await OrderModel.getProductRevenue(storeId);
+    return { overview, products };
+};
+
+module.exports = { getAllOrders, getOrderById, getOrdersByUserId, createOrder, deleteOrder, getOrderStoreById, updateStoreOrderStatus, getStoreAnalytics };

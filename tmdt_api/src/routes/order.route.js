@@ -18,4 +18,11 @@ router.post('/', authMiddleware, OrderController.create);
 // Xóa đơn hàng
 router.delete('/:id', authMiddleware, OrderController.remove);
 
+// Route mới cho Seller xem chi tiết đơn hàng của họ
+router.get('/store/:storeId/:orderId', authMiddleware, OrderController.getForStore);
+
+router.put('/store/:storeId/:orderId/status', authMiddleware, OrderController.updateStatusForStore);
+
+router.get('/analytics/:storeId', authMiddleware, OrderController.getAnalytics);
+
 module.exports = router;
