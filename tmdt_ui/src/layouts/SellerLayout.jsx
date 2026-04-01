@@ -13,7 +13,7 @@ import {
 
 function SellerLayout({ children }) {
     const menuItems = [
-        { icon: <TrendingUp size={22} />, label: 'Thống Kê', path: '/seller/thong-ke' },
+        { icon: <TrendingUp size={22} />, label: 'Thống Kê', path: '/seller' },
         { icon: <ClipboardList size={22} />, label: 'Đơn hàng', path: '/seller/don-hang' },
         { icon: <Boxes size={22} />, label: 'Kho hàng', path: '/seller/san-pham' },
         { icon: <ShoppingBag size={22} />, label: 'Đánh giá', path: '/seller/danh-gia' },
@@ -25,7 +25,6 @@ function SellerLayout({ children }) {
         <div className="flex min-h-screen bg-gray-50">
             {/* SIDEBAR - SELLER STYLE */}
             <aside className="w-30 h-screen sticky top-0 bg-white border-r border-gray-100 flex flex-col shadow-sm">
-                
                 {/* Logo Section - Chuyển sang tông màu Cam của Seller */}
                 <div className="flex flex-col items-center py-6 border-b border-gray-50 gap-1">
                     <div className="p-2 bg-orange-500 rounded-lg text-white shadow-orange-100 shadow-lg">
@@ -65,9 +64,7 @@ function SellerLayout({ children }) {
 
             {/* CONTENT AREA */}
             <main className="flex-1 p-8 overflow-y-auto">
-                <div className="max-w-7xl mx-auto">
-                    {children}
-                </div>
+                <div className="max-w-7xl mx-auto">{children}</div>
             </main>
 
             {/* CSS Custom */}

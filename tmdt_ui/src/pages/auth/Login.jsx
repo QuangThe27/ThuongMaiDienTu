@@ -3,18 +3,34 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginApi } from '../../services/authService';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNotification } from '../../contexts/NotificationContext'; 
+import { useNotification } from '../../contexts/NotificationContext';
 import './AuthStyles.css';
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState(''); // Đổi từ account -> email
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const { login } = useAuth();
     const { showNotification } = useNotification();
+
+    // Hàm bổ trợ để xác định đường dẫn dựa trên role
+    const getRedirectPath = (role) => {
+        switch (
+            Number(role) // Ép kiểu số để tránh lỗi so sánh chuỗi/số
+        ) {
+            case 1:
+                return '/admin';
+            case 2:
+                return '/seller';
+            case 3:
+                return '/';
+            default:
+                return '/';
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,13 +39,26 @@ function Login() {
         try {
             const res = await loginApi(email, password);
 
+            // Giả định backend trả về: res.data.user = { id: 1, role: 1, ... }
             if (res.data && res.data.accessToken) {
-                login(res.data.user, res.data.accessToken);
+                const userData = res.data.user;
+                const token = res.data.accessToken;
+
+                // 1. Cập nhật context và localStorage
+                login(userData, token);
+
+                // 2. Thông báo thành công
                 showNotification(res.message || 'Đăng nhập thành công', 'success');
-                navigate('/');
+
+                // 3. Điều hướng dựa trên role
+                const targetPath = getRedirectPath(userData.role);
+                navigate(targetPath);
             }
         } catch (err) {
-            showNotification(err.message || 'Đăng nhập thất bại', 'error');
+            showNotification(
+                err.response?.data?.message || err.message || 'Đăng nhập thất bại',
+                'error'
+            );
         } finally {
             setLoading(false);
         }

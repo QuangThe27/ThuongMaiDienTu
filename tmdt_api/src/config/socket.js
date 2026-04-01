@@ -1,33 +1,36 @@
 const { Server } = require('socket.io');
 const ChatService = require('../modules/chat/chat.service');
 
+let io; // Khai báo biến io để export dùng ở các file khác
+
 const initSocket = (server) => {
-    const io = new Server(server, {
-        cors: { origin: "http://localhost:5173" } // Cấu hình cho FE truy cập
+    io = new Server(server, {
+        cors: { origin: 'http://localhost:5173' },
     });
 
     io.on('connection', (socket) => {
         console.log('User connected:', socket.id);
 
-        // Tham gia vào một phòng cụ thể dựa trên UserId và StoreId
+        // Room để nhận thông báo cá nhân (ví dụ: cập nhật giỏ hàng)
+        socket.on('join_user_room', (userId) => {
+            socket.join(`user_${userId}`);
+            console.log(`User ${userId} joined their private room`);
+        });
+
+        // Chat Room Logic (Giữ nguyên của bạn)
         socket.on('join_room', (data) => {
             const roomName = `room_${data.userId}_${data.storeId}`;
             socket.join(roomName);
-            console.log(`User joined room: ${roomName}`);
         });
 
-        // Lắng nghe tin nhắn gửi lên
         socket.on('send_message', async (data) => {
             try {
-                // 1. Lưu vào Database thông qua Service
                 const newMessage = await ChatService.createChat({
                     user_id: data.userId,
                     store_id: data.storeId,
-                    sender_type: data.senderType, // 1: user, 2: store
-                    message: data.message
+                    sender_type: data.senderType,
+                    message: data.message,
                 });
-
-                // 2. Gửi lại cho những người trong phòng đó
                 const roomName = `room_${data.userId}_${data.storeId}`;
                 io.to(roomName).emit('receive_message', newMessage);
             } catch (error) {
@@ -43,4 +46,10 @@ const initSocket = (server) => {
     return io;
 };
 
-module.exports = initSocket;
+// Hàm helper để gửi sự kiện từ bất kỳ đâu trong BE
+const getIO = () => {
+    if (!io) throw new Error('Socket.io chưa được khởi tạo!');
+    return io;
+};
+
+module.exports = { initSocket, getIO };

@@ -7,14 +7,7 @@ const allowStatus = require('../middlewares/statusAccount.middleware');
 const { uploadAvatar } = require('../config/cloudinary');
 
 router.get('/', authMiddleware, allowStatus(['0']), allowRoles(['1']), UserController.getAllUsers);
-
-router.get(
-    '/:id',
-    authMiddleware,
-    allowStatus(['0']),
-    UserController.getUserById
-);
-
+router.get('/:id', authMiddleware, allowStatus(['0']), UserController.getUserById);
 router.delete(
     '/:id',
     authMiddleware,
@@ -22,7 +15,6 @@ router.delete(
     allowRoles(['1']),
     UserController.deleteUserById
 );
-
 router.post(
     '/',
     authMiddleware,
@@ -31,7 +23,6 @@ router.post(
     uploadAvatar.single('avatar'),
     UserController.createUser
 );
-
 router.put(
     '/:id',
     authMiddleware,

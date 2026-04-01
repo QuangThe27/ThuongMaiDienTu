@@ -1,5 +1,5 @@
 import SellerLayout from '../layouts/SellerLayout';
-import Product from "../pages/seller/Product";
+import Product from '../pages/seller/Product';
 import ProductCreate from '../pages/seller/ProductCreate';
 import ProductEdit from '../pages/seller/ProductEdit';
 import SellerReview from '../pages/seller/SellerReview';
@@ -11,13 +11,17 @@ import SellerDashboard from '../pages/seller/SellerDashboard';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 // Helper dành riêng cho Seller (Role = 2)
-const protectSeller = (element) => (
-    <ProtectedRoute allowedRoles={[2]}> 
-        {element}
-    </ProtectedRoute>
-);
+const protectSeller = (element) => <ProtectedRoute allowedRoles={[2]}>{element}</ProtectedRoute>;
 
 const sellerRoutes = [
+    {
+        path: '/seller',
+        element: protectSeller(
+            <SellerLayout>
+                <SellerDashboard />
+            </SellerLayout>
+        ),
+    },
     {
         path: '/seller/san-pham',
         element: protectSeller(
@@ -71,14 +75,6 @@ const sellerRoutes = [
         element: protectSeller(
             <SellerLayout>
                 <SellerOrderDetail />
-            </SellerLayout>
-        ),
-    },
-    {
-        path: '/seller/thong-ke',
-        element: protectSeller(
-            <SellerLayout>
-                <SellerDashboard />
             </SellerLayout>
         ),
     },

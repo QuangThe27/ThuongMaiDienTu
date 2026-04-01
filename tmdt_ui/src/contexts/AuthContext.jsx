@@ -1,17 +1,17 @@
 import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 
-// 1. Khởi tạo Context với giá trị mặc định để tránh báo đỏ khi gọi useContext
 const AuthContext = createContext({
     user: null,
     isLoggedIn: false,
     login: () => {},
     logout: () => {},
+    loading: true,
 });
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [loading, setLoading] = useState(true); // Thêm trạng thái loading để tránh giật giao diện
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const initializeAuth = () => {
@@ -48,7 +48,6 @@ export const AuthProvider = ({ children }) => {
         setIsLoggedIn(false);
     };
 
-    // 2. Sử dụng useMemo để tối ưu hiệu năng, tránh render lại không cần thiết
     const value = useMemo(
         () => ({
             user,
@@ -60,10 +59,10 @@ export const AuthProvider = ({ children }) => {
         [user, isLoggedIn, loading]
     );
 
+    // Chỉ render children khi đã kiểm tra xong localStorage để tránh redirect nhầm
     return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
 
-// 3. Đảm bảo hook này được export đúng cách
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
