@@ -39,4 +39,13 @@ const getStoreAnalytics = async (storeId) => {
     return { overview, products };
 };
 
-module.exports = { getAllOrders, getOrderById, getOrdersByUserId, createOrder, deleteOrder, getOrderStoreById, updateStoreOrderStatus, getStoreAnalytics };
+module.exports = {
+    getAllOrders,
+    getOrderById,
+    getOrdersByUserId,
+    createOrder,
+    deleteOrder,
+    getOrderStoreById,
+    updateStoreOrderStatus,
+    getStoreAnalytics,
+};

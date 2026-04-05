@@ -30,15 +30,24 @@ const getByUserId = async (req, res) => {
 const create = async (req, res) => {
     try {
         const { items, ...orderData } = req.body;
-        // orderData bao gồm: user_id, name, address, phone, total_price, payment_method...
+
+        /**
+         * orderData yêu cầu tối thiểu:
+         * user_id, name, address, phone, total_price, payment_method
+         */
         const orderId = await OrderService.createOrder(orderData, items);
-        res.status(201).json({ 
-            status: 'success', 
-            message: 'Đặt hàng thành công!', 
-            orderId 
+
+        return res.status(201).json({
+            success: true,
+            message: 'Đặt hàng thành công!',
+            orderId: orderId,
         });
     } catch (error) {
-        res.status(400).json({ status: 'error', message: error.message });
+        console.error('Controller Order Error:', error.message);
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
 
@@ -82,4 +91,13 @@ const getAnalytics = async (req, res) => {
     }
 };
 
-module.exports = { getAll, getById, getByUserId, create, remove, getForStore, updateStatusForStore, getAnalytics };
+module.exports = {
+    getAll,
+    getById,
+    getByUserId,
+    create,
+    remove,
+    getForStore,
+    updateStatusForStore,
+    getAnalytics,
+};

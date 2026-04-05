@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     ShoppingCart,
     Bell,
@@ -11,23 +11,47 @@ import {
     Store,
     ShieldCheck,
     ChevronDown,
+    Trash2,
+    BellOff,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getStoreByUserId } from '../services/storeService';
 import { getCategories } from '../services/categoryService';
 import { getCartByUserId } from '../services/cartService';
-import socket from '../socket'; // Import socket instance của bạn
+import {
+    getNotificationsForUser,
+    markAsRead, // Sử dụng hàm markAsRead mới
+    deleteNotification,
+} from '../services/notificationService';
+import socket from '../socket';
 
 function Header() {
     const { isLoggedIn, user, logout } = useAuth();
     const navigate = useNavigate();
+
+    // States
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [userStoreId, setUserStoreId] = useState(null);
+    const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+    const [, setUserStoreId] = useState(null);
     const [categories, setCategories] = useState([]);
     const [cartCount, setCartCount] = useState(0);
 
-    // Hàm lấy số lượng giỏ hàng riêng biệt để tái sử dụng
+    // Notification States
+    const [notifications, setNotifications] = useState([]);
+    const notifyRef = useRef(null);
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notifyRef.current && !notifyRef.current.contains(event.target)) {
+                setIsNotifyOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const fetchCartCount = useCallback(async () => {
         if (isLoggedIn && user) {
             try {
@@ -37,6 +61,19 @@ function Header() {
                 }
             } catch (error) {
                 console.error('Lỗi khi fetch cart count:', error);
+            }
+        }
+    }, [isLoggedIn, user]);
+
+    const fetchNotifications = useCallback(async () => {
+        if (isLoggedIn && user) {
+            try {
+                const res = await getNotificationsForUser(user.id);
+                if (res && res.data) {
+                    setNotifications(res.data);
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải thông báo:', error);
             }
         }
     }, [isLoggedIn, user]);
@@ -53,16 +90,23 @@ function Header() {
                         if (storeRes && storeRes.data) setUserStoreId(storeRes.data.id);
                     }
                     fetchCartCount();
+                    fetchNotifications();
 
-                    // Real-time Logic
                     socket.emit('join_user_room', user.id);
 
                     socket.on('cart_updated', () => {
-                        console.log('Giỏ hàng đã thay đổi, đang cập nhật số lượng...');
                         fetchCartCount();
+                    });
+
+                    socket.off('new_notification');
+                    socket.on('new_notification', (newNotify) => {
+                        console.log('Nhận thông báo mới:', newNotify);
+                        // Khi nhận qua socket, đảm bảo status là 0 (chưa đọc)
+                        setNotifications((prev) => [{ ...newNotify, status: 0 }, ...prev]);
                     });
                 } else {
                     setCartCount(0);
+                    setNotifications([]);
                 }
             } catch (error) {
                 console.error('Lỗi khi tải dữ liệu Header:', error);
@@ -71,20 +115,55 @@ function Header() {
 
         fetchInitialData();
 
-        // Cleanup socket khi component unmount hoặc user logout
         return () => {
             socket.off('cart_updated');
+            socket.off('new_notification');
         };
-    }, [isLoggedIn, user, fetchCartCount]);
+    }, [isLoggedIn, user, fetchCartCount, fetchNotifications]);
+
+    // Cập nhật trạng thái đọc (1 = đã đọc, 0 = chưa đọc)
+    const handleMarkAsReadInternal = async (id, currentStatus) => {
+        if (currentStatus === 1) return; // Nếu đã đọc rồi thì không gọi API nữa
+        try {
+            await markAsRead(id); // Gọi hàm từ service
+            setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, status: 1 } : n)));
+        } catch (error) {
+            console.error('Lỗi cập nhật trạng thái:', error);
+        }
+    };
+
+    const handleDeleteNotify = async (e, id) => {
+        e.stopPropagation();
+        try {
+            await deleteNotification(id);
+            setNotifications((prev) => prev.filter((n) => n.id !== id));
+        } catch (error) {
+            console.error('Lỗi xóa thông báo:', error);
+        }
+    };
+
+    const handleNotifyClick = async (notify) => {
+        // Cập nhật trạng thái dù có path hay không
+        await handleMarkAsReadInternal(notify.id, notify.status);
+        setIsNotifyOpen(false);
+        if (notify.path) {
+            navigate(notify.path);
+        }
+    };
 
     const formatCount = (count) => (count > 99 ? '99+' : count);
 
     const handleLogout = () => {
         logout();
         setIsDropdownOpen(false);
+        setIsNotifyOpen(false);
         setCartCount(0);
+        setNotifications([]);
         navigate('/dang-nhap');
     };
+
+    // unreadCount dựa trên giá trị 0
+    const unreadCount = notifications.filter((n) => n.status === 0).length;
 
     return (
         <header className="w-full absolute top-0 left-0 z-50 bg-black/10 backdrop-blur-sm border-b border-white/10 transition-all duration-300">
@@ -110,11 +189,9 @@ function Header() {
                                     className="ml-1 group-hover:rotate-180 transition-transform duration-300"
                                 />
                             </button>
-
                             <div className="absolute hidden group-hover:block left-1/2 -translate-x-1/2 top-full w-[650px] pt-4 animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="bg-white text-gray-800 rounded-xl shadow-2xl p-5 border border-gray-100 overflow-hidden relative">
                                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45 border-l border-t border-gray-100"></div>
-
                                     <div className="grid grid-cols-6 gap-3 relative z-10">
                                         {categories.map((cat) => (
                                             <Link
@@ -126,11 +203,6 @@ function Header() {
                                             </Link>
                                         ))}
                                     </div>
-                                    {categories.length === 0 && (
-                                        <p className="text-center text-gray-400 text-sm py-4">
-                                            Đang tải danh mục...
-                                        </p>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -141,7 +213,6 @@ function Header() {
                         >
                             Sản phẩm
                         </Link>
-
                         <Link
                             to="/support"
                             className="hover:text-sky-300 transition-colors uppercase text-sm tracking-wide"
@@ -169,6 +240,7 @@ function Header() {
                                 </div>
                             ) : (
                                 <div className="flex items-center space-x-5">
+                                    {/* Cart */}
                                     <div className="relative cursor-pointer hover:text-sky-300 transition-colors">
                                         <Link to="/gio-hang">
                                             <ShoppingCart size={24} />
@@ -180,16 +252,109 @@ function Header() {
                                         )}
                                     </div>
 
-                                    <div className="relative cursor-pointer hover:text-sky-300 transition-colors">
-                                        <Bell size={24} />
-                                        <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] text-white font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white">
-                                            5
-                                        </span>
+                                    {/* Notification Dropdown */}
+                                    <div className="relative" ref={notifyRef}>
+                                        <button
+                                            onClick={() => {
+                                                setIsNotifyOpen(!isNotifyOpen);
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className="relative cursor-pointer hover:text-sky-300 transition-colors pt-1"
+                                        >
+                                            <Bell size={24} />
+                                            {unreadCount > 0 && (
+                                                <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] text-white font-bold w-4 h-4 flex items-center justify-center rounded-full border border-white animate-pulse">
+                                                    {formatCount(unreadCount)}
+                                                </span>
+                                            )}
+                                        </button>
+
+                                        {isNotifyOpen && (
+                                            <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[70] animate-in fade-in slide-in-from-top-3 duration-200">
+                                                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                                    <h3 className="font-bold text-gray-800 flex items-center">
+                                                        Thông báo
+                                                        {unreadCount > 0 && (
+                                                            <span className="ml-2 px-2 py-0.5 bg-sky-100 text-sky-600 text-[10px] rounded-full">
+                                                                {unreadCount} mới
+                                                            </span>
+                                                        )}
+                                                    </h3>
+                                                </div>
+
+                                                <div className="max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                                                    {notifications.length > 0 ? (
+                                                        notifications.map((notify) => (
+                                                            <div
+                                                                key={notify.id}
+                                                                onClick={() =>
+                                                                    handleNotifyClick(notify)
+                                                                }
+                                                                className={`group relative p-4 border-b border-gray-50 hover:bg-sky-50/50 transition-all cursor-pointer flex gap-3 ${
+                                                                    notify.status === 0
+                                                                        ? 'bg-sky-50/40'
+                                                                        : ''
+                                                                }`}
+                                                            >
+                                                                <div
+                                                                    className={`mt-1 flex-shrink-0 w-2 h-2 rounded-full ${
+                                                                        notify.status === 0
+                                                                            ? 'bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]'
+                                                                            : 'bg-transparent'
+                                                                    }`}
+                                                                />
+                                                                <div className="flex-1">
+                                                                    <p
+                                                                        className={`text-[13px] leading-tight ${
+                                                                            notify.status === 0
+                                                                                ? 'font-bold text-gray-900'
+                                                                                : 'font-medium text-gray-600'
+                                                                        }`}
+                                                                    >
+                                                                        {notify.title}
+                                                                    </p>
+                                                                    <p className="text-[12px] text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                                                                        {notify.message}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button
+                                                                        onClick={(e) =>
+                                                                            handleDeleteNotify(
+                                                                                e,
+                                                                                notify.id
+                                                                            )
+                                                                        }
+                                                                        className="p-1 hover:bg-red-100 text-gray-400 hover:text-red-500 rounded-md transition-colors"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-10 flex flex-col items-center justify-center text-gray-400">
+                                                            <BellOff
+                                                                size={32}
+                                                                className="mb-2 opacity-20"
+                                                            />
+                                                            <p className="text-sm">
+                                                                Không có thông báo nào
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
+                                    {/* User Account */}
                                     <div className="relative">
                                         <button
-                                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                            onClick={() => {
+                                                setIsDropdownOpen(!isDropdownOpen);
+                                                setIsNotifyOpen(false);
+                                            }}
                                             className="flex items-center space-x-2 focus:outline-none bg-white/20 p-1 pr-3 rounded-full hover:bg-white/30 transition-colors"
                                         >
                                             <div className="bg-sky-500 text-white p-1.5 rounded-full">
@@ -216,7 +381,6 @@ function Header() {
                                                     />{' '}
                                                     Lịch sử
                                                 </Link>
-
                                                 {user?.role === 1 && (
                                                     <Link
                                                         to="/admin"
@@ -230,7 +394,6 @@ function Header() {
                                                         Quản trị
                                                     </Link>
                                                 )}
-
                                                 {user?.role === 2 && (
                                                     <Link
                                                         to="/seller/thong-ke"
@@ -244,21 +407,6 @@ function Header() {
                                                         Cửa hàng
                                                     </Link>
                                                 )}
-
-                                                {user?.role === 2 && userStoreId && (
-                                                    <Link
-                                                        to={`/cua-hang/${userStoreId}`}
-                                                        onClick={() => setIsDropdownOpen(false)}
-                                                        className="flex items-center px-4 py-2.5 hover:bg-sky-50 transition-colors"
-                                                    >
-                                                        <Store
-                                                            size={18}
-                                                            className="mr-3 text-sky-500"
-                                                        />{' '}
-                                                        My Store
-                                                    </Link>
-                                                )}
-
                                                 <Link
                                                     to="/cai-dat"
                                                     onClick={() => setIsDropdownOpen(false)}

@@ -10,13 +10,21 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendMail = async (to, subject, html) => {
-    await transporter.sendMail({
-        from: `"Hệ thống Dịch Vụ Home" <${process.env.MAIL_FROM}>`,
-        to,
-        subject,
-        html,
-    });
+const sendMail = async (to, subject, html, attachments = []) => {
+    try {
+        const mailOptions = {
+            from: `"Hệ thống Thương Mại Điện Tử" <${process.env.MAIL_USER}>`,
+            to: to,
+            subject: subject,
+            html: html,
+            attachments: attachments,
+        };
+
+        return await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Lỗi gửi mail nội bộ:', error);
+        throw error;
+    }
 };
 
 module.exports = {

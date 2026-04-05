@@ -10,5 +10,7 @@ router.use('/carts', require('./cart.route'));
 router.use('/orders', require('./order.route'));
 router.use('/reviews', require('./review.route'));
 router.use('/chats', require('./chat.route'));
+router.use('/support', require('./support.route'));
+router.use('/notification', require('./notification.route'));
 
 module.exports = router;
