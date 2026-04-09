@@ -33,10 +33,25 @@ const updateStoreOrderStatus = async (orderId, storeId, status) => {
     return await OrderModel.updateItemStatus(orderId, storeId, status);
 };
 
+const updateOrder = async (id, updateData) => {
+    // Kiểm tra xem đơn hàng có tồn tại không trước khi cập nhật
+    const order = await OrderModel.findById(id);
+    if (!order) throw new Error('Không tìm thấy đơn hàng để cập nhật.');
+
+    const success = await OrderModel.update(id, updateData);
+    if (!success) throw new Error('Cập nhật đơn hàng thất bại.');
+
+    return success;
+};
+
 const getStoreAnalytics = async (storeId) => {
     const overview = await OrderModel.getRevenueByStore(storeId);
     const products = await OrderModel.getProductRevenue(storeId);
     return { overview, products };
+};
+
+const getOrdersByStore = async (storeId) => {
+    return await OrderModel.getOrdersByStore(storeId);
 };
 
 module.exports = {
@@ -46,6 +61,8 @@ module.exports = {
     createOrder,
     deleteOrder,
     getOrderStoreById,
+    getOrdersByStore,
     updateStoreOrderStatus,
+    updateOrder,
     getStoreAnalytics,
 };

@@ -12,15 +12,13 @@ import CategoryEdit from '../pages/admin/CategoryEdit';
 import Product from '../pages/admin/Product';
 import ProductDetail from '../pages/admin/ProductDetail';
 import Review from '../pages/admin/Review';
+import Order from '../pages/admin/Order';
+import OrderDetail from '../pages/admin/OrderDetail';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
-// Hàm helper để bọc bảo vệ route 
-const protect = (element) => (
-    <ProtectedRoute allowedRoles={[1]}>
-        {element}
-    </ProtectedRoute>
-);
+// Hàm helper để bọc bảo vệ route
+const protect = (element) => <ProtectedRoute allowedRoles={[1]}>{element}</ProtectedRoute>;
 
 const adminRoutes = [
     {
@@ -103,7 +101,7 @@ const adminRoutes = [
             </AdminLayout>
         ),
     },
-     {
+    {
         path: '/quan-ly/san-pham',
         element: protect(
             <AdminLayout>
@@ -124,6 +122,22 @@ const adminRoutes = [
         element: protect(
             <AdminLayout>
                 <Review />
+            </AdminLayout>
+        ),
+    },
+    {
+        path: '/quan-ly/don-hang',
+        element: protect(
+            <AdminLayout>
+                <Order />
+            </AdminLayout>
+        ),
+    },
+    {
+        path: '/quan-ly/don-hang/:id',
+        element: protect(
+            <AdminLayout>
+                <OrderDetail />
             </AdminLayout>
         ),
     },

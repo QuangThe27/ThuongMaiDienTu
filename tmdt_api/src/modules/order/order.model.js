@@ -154,6 +154,12 @@ const updateItemStatus = async (orderId, storeId, status) => {
     return result.affectedRows > 0;
 };
 
+const update = async (id, updateData) => {
+    // updateData sẽ là một object ví dụ: { status: 1, payment_status: 1 }
+    const [result] = await db.query('UPDATE orders SET ? WHERE id = ?', [updateData, id]);
+    return result.affectedRows > 0;
+};
+
 // Tính toán doanh thu theo từng trạng thái của 1 Store
 const getRevenueByStore = async (storeId) => {
     const [rows] = await db.query(
@@ -208,6 +214,18 @@ const updatePaymentStatus = async (orderId, connection = null) => {
     return await db.query(query, [orderId]);
 };
 
+const getOrdersByStore = async (storeId) => {
+    const query = `
+        SELECT DISTINCT o.* FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN products p ON oi.product_id = p.id
+        WHERE p.store_id = ?
+        ORDER BY o.created_at DESC
+    `;
+    const [rows] = await db.query(query, [storeId]);
+    return rows;
+};
+
 module.exports = {
     findAll,
     findById,
@@ -216,8 +234,10 @@ module.exports = {
     deleteById,
     findByStoreId,
     updateItemStatus,
+    update,
     getRevenueByStore,
     getProductRevenue,
+    getOrdersByStore,
     findPendingOnlineOrders,
     updatePaymentStatus,
 };

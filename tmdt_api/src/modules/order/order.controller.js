@@ -81,11 +81,41 @@ const updateStatusForStore = async (req, res) => {
     }
 };
 
+const update = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+        // updateData lúc này sẽ là { status: ..., payment_status: ... }
+
+        await OrderService.updateOrder(id, updateData);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Cập nhật trạng thái đơn hàng thành công.',
+        });
+    } catch (error) {
+        res.status(400).json({
+            status: 'error',
+            message: error.message,
+        });
+    }
+};
+
 const getAnalytics = async (req, res) => {
     try {
         const { storeId } = req.params;
         const data = await OrderService.getStoreAnalytics(storeId);
         res.status(200).json({ status: 'success', data });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+};
+
+const getOrdersByStore = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        const orders = await OrderService.getOrdersByStore(storeId);
+        res.status(200).json({ status: 'success', data: orders });
     } catch (error) {
         res.status(500).json({ status: 'error', message: error.message });
     }
@@ -98,6 +128,8 @@ module.exports = {
     create,
     remove,
     getForStore,
+    getOrdersByStore,
     updateStatusForStore,
+    update,
     getAnalytics,
 };

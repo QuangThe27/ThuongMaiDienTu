@@ -39,3 +39,13 @@ export const getStoreAnalytics = async (storeId) => {
     const response = await apiClient.get(`/orders/analytics/${storeId}`);
     return response.data;
 };
+
+export const updateOrder = async (id, data) => {
+    const response = await apiClient.put(`/orders/${id}`, data);
+    return response.data;
+};
+
+export const getOrdersByStore = async (storeId) => {
+    const response = await apiClient.get(`/orders/store/${storeId}`);
+    return response.data;
+};

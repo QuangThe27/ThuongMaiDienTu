@@ -8,17 +8,19 @@ import {
     Layers,
     Store,
     Star,
+    ShoppingBag,
 } from 'lucide-react';
 
 function AdminLayout({ children }) {
     const menuItems = [
-    { icon: <LayoutDashboard size={22} />, label: 'Dashboard', path: '/admin' },
-    { icon: <Users size={22} />, label: 'Người dùng', path: '/quan-ly/nguoi-dung' },
-    { icon: <Store size={22} />, label: 'Cửa hàng', path: '/quan-ly/cua-hang' },
-    { icon: <Layers size={22} />, label: 'Danh mục', path: '/quan-ly/danh-muc' },
-    { icon: <Package size={22} />, label: 'Sản phẩm', path: '/quan-ly/san-pham' },
-    { icon: <Star size={22} />, label: 'Đánh giá', path: '/quan-ly/danh-gia' },
-];
+        { icon: <LayoutDashboard size={22} />, label: 'Dashboard', path: '/admin' },
+        { icon: <Users size={22} />, label: 'Người dùng', path: '/quan-ly/nguoi-dung' },
+        { icon: <Store size={22} />, label: 'Cửa hàng', path: '/quan-ly/cua-hang' },
+        { icon: <Layers size={22} />, label: 'Danh mục', path: '/quan-ly/danh-muc' },
+        { icon: <Package size={22} />, label: 'Sản phẩm', path: '/quan-ly/san-pham' },
+        { icon: <ShoppingBag size={22} />, label: 'Đơn hàng', path: '/quan-ly/don-hang' },
+        { icon: <Star size={22} />, label: 'Đánh giá', path: '/quan-ly/danh-gia' },
+    ];
 
     return (
         <div className="flex min-h-screen bg-gray-50">

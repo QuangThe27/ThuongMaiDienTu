@@ -279,9 +279,24 @@ function ProductDetail() {
                                 >
                                     <Minus size={14} />
                                 </button>
-                                <span className="w-10 text-center font-black text-lg">
-                                    {quantity}
-                                </span>
+                                <input
+                                    type="number"
+                                    value={quantity}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        if (!isNaN(val)) {
+                                            setQuantity(Math.max(1, val)); // Đảm bảo không nhỏ hơn 1
+                                        } else {
+                                            setQuantity(''); // Cho phép xóa trống tạm thời để nhập số mới
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        if (quantity === '' || quantity < 1) {
+                                            setQuantity(1); // Reset về 1 nếu để trống hoặc nhập số lỗi khi rời chuột
+                                        }
+                                    }}
+                                    className="w-12 text-center font-black text-lg focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                />
                                 <button
                                     onClick={() => setQuantity((q) => q + 1)}
                                     className="px-4 h-full hover:bg-gray-100"
@@ -299,28 +314,6 @@ function ProductDetail() {
                                 <ShoppingCart size={20} />
                                 <span>{isAdding ? 'Đang xử lý...' : 'Thêm vào giỏ hàng'}</span>
                             </button>
-                            <button className="px-5 border-2 border-gray-200 hover:bg-red-50 group">
-                                <Heart
-                                    size={20}
-                                    className="group-hover:text-red-500 group-hover:fill-red-500"
-                                />
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 py-8 border-t border-gray-100">
-                            <div className="flex items-center space-x-4">
-                                <div className="bg-sky-50 p-3 text-sky-600">
-                                    <Truck size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase">
-                                        Giao hàng siêu tốc
-                                    </p>
-                                    <p className="text-[11px] text-gray-500">
-                                        Miễn phí vận chuyển từ 1.000.000đ
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

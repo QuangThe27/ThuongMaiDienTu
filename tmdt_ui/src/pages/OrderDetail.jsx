@@ -185,7 +185,7 @@ function OrderDetail() {
         <div className="bg-white min-h-screen pt-32 pb-20">
             <div className="container mx-auto px-4 max-w-4xl">
                 <Link
-                    to="/history"
+                    to="/lich-su-don-hang"
                     className="inline-flex items-center gap-2 font-black uppercase text-xs mb-8 hover:text-sky-500 transition-all"
                 >
                     <ChevronLeft size={16} /> Quay lại lịch sử
