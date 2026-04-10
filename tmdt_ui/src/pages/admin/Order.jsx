@@ -110,6 +110,7 @@ function Order() {
                 searchPlaceholder="Tìm mã ĐH, tên khách hàng..."
                 onSearch={setSearchTerm}
                 showExport={true}
+                showAdd={false}
                 onExport={handleExport}
             />
 

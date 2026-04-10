@@ -18,7 +18,6 @@ function SellerLayout({ children }) {
         { icon: <Boxes size={22} />, label: 'Kho hàng', path: '/seller/san-pham' },
         { icon: <ShoppingBag size={22} />, label: 'Đánh giá', path: '/seller/danh-gia' },
         { icon: <MessageSquare size={22} />, label: 'Chat', path: '/seller/danh-sach-tin-nhan' },
-        { icon: <Settings size={22} />, label: 'Cài đặt', path: '/seller/thiet-lap' },
     ];
 
     return (

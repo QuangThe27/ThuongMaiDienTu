@@ -15,7 +15,9 @@ function SellerChat() {
     const [storeInfo, setStoreInfo] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
 
-    const CLOUDINARY_AVATAR = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${import.meta.env.VITE_CLOUDINARY_AVATAR}`;
+    const CLOUDINARY_AVATAR = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${
+        import.meta.env.VITE_CLOUDINARY_AVATAR
+    }`;
 
     const showNotify = (message, type = 'success') => {
         setNotification({ message, type });
@@ -52,10 +54,10 @@ function SellerChat() {
                 <Notification {...notification} onClose={() => setNotification(null)} />
             )}
 
-            <SellerHeader 
+            <SellerHeader
                 subTitle="Quản lý hội thoại và chăm sóc khách hàng"
-                searchPlaceholder="Tìm tên khách hàng..." 
-                hideCreate={true} 
+                searchPlaceholder="Tìm tên khách hàng..."
+                hideCreate={true}
             />
 
             <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
@@ -63,13 +65,27 @@ function SellerChat() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-orange-50/50 border-b border-gray-100">
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center w-16">STT</th>
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase w-24 text-center">Ảnh</th>
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase">Khách hàng</th>
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase">Tin nhắn cuối</th>
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center">Ngày gửi</th>
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center">Trạng thái</th>
-                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center">Thao tác</th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center w-16">
+                                    STT
+                                </th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase w-24 text-center">
+                                    Ảnh
+                                </th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase">
+                                    Khách hàng
+                                </th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase">
+                                    Tin nhắn cuối
+                                </th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center">
+                                    Ngày gửi
+                                </th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center">
+                                    Trạng thái
+                                </th>
+                                <th className="p-4 font-bold text-gray-400 text-[11px] uppercase text-center">
+                                    Thao tác
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -81,26 +97,53 @@ function SellerChat() {
                                 </tr>
                             ) : conversations.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="p-10 text-center text-gray-400">Chưa có khách hàng nào.</td>
+                                    <td colSpan="7" className="p-10 text-center text-gray-400">
+                                        Chưa có khách hàng nào.
+                                    </td>
                                 </tr>
                             ) : (
                                 conversations.map((conv, index) => (
-                                    <tr key={conv.user_id} className={`hover:bg-orange-50/20 transition-colors ${conv.is_read === 0 ? 'bg-blue-50/30' : ''}`}>
-                                        <td className="p-4 text-sm text-center text-gray-400 font-medium">{index + 1}</td>
+                                    <tr
+                                        key={conv.user_id}
+                                        className={`hover:bg-orange-50/20 transition-colors ${
+                                            conv.is_read === 0 ? 'bg-blue-50/30' : ''
+                                        }`}
+                                    >
+                                        <td className="p-4 text-sm text-center text-gray-400 font-medium">
+                                            {index + 1}
+                                        </td>
                                         <td className="p-4 text-center">
                                             <div className="w-12 h-12 mx-auto rounded-full bg-gray-50 overflow-hidden border border-gray-100 flex items-center justify-center">
                                                 {conv.user_avatar ? (
-                                                    <img src={`${CLOUDINARY_AVATAR}/${conv.user_avatar}`} className="w-full h-full object-cover" alt="" />
-                                                ) : <User className="text-gray-300" size={20} />}
+                                                    <img
+                                                        src={`${CLOUDINARY_AVATAR}/${conv.user_avatar}`}
+                                                        className="w-full h-full object-cover"
+                                                        alt=""
+                                                    />
+                                                ) : (
+                                                    <User className="text-gray-300" size={20} />
+                                                )}
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`font-bold ${conv.is_read === 0 ? 'text-blue-600' : 'text-gray-800'}`}>
+                                            <span
+                                                className={`font-bold ${
+                                                    conv.is_read === 0
+                                                        ? 'text-blue-600'
+                                                        : 'text-gray-800'
+                                                }`}
+                                            >
                                                 {conv.user_name}
                                             </span>
                                         </td>
                                         <td className="p-4">
-                                            <p className={`text-sm truncate max-w-[200px] ${conv.is_read === 0 ? 'font-bold text-gray-900' : 'text-gray-500'}`}>
+                                            <p
+                                                className={`text-sm truncate max-w-[200px] ${
+                                                    conv.is_read === 0
+                                                        ? 'font-bold text-gray-900'
+                                                        : 'text-gray-500'
+                                                }`}
+                                            >
                                                 {conv.last_message}
                                             </p>
                                         </td>
@@ -121,7 +164,7 @@ function SellerChat() {
                                             )}
                                         </td>
                                         <td className="p-4 text-center">
-                                            <button 
+                                            <button
                                                 onClick={() => setSelectedUser(conv)}
                                                 className="p-2.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all relative"
                                             >
@@ -143,18 +186,22 @@ function SellerChat() {
             {selectedUser && storeInfo && (
                 <div className="fixed bottom-4 right-4 z-[100] w-[380px] shadow-2xl animate-slide-up">
                     <div className="relative group">
-                        <button 
+                        <button
                             onClick={() => setSelectedUser(null)}
                             className="absolute -top-2 -left-2 z-[110] bg-white text-gray-500 hover:text-red-500 rounded-full p-1 shadow-md border border-gray-100 transition-colors"
                         >
                             <X size={16} />
                         </button>
-                        <ChatBox 
+                        <ChatBox
                             userId={selectedUser.user_id}
                             storeId={storeInfo.id}
                             storeName={selectedUser.user_name}
-                            isAdminView={true} 
-                            storeLogo={selectedUser.user_avatar ? `${CLOUDINARY_AVATAR}/${selectedUser.user_avatar}` : ''}
+                            isAdminView={true}
+                            storeLogo={
+                                selectedUser.user_avatar
+                                    ? `${CLOUDINARY_AVATAR}/${selectedUser.user_avatar}`
+                                    : ''
+                            }
                         />
                     </div>
                 </div>
