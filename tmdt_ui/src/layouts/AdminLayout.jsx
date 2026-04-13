@@ -10,8 +10,13 @@ import {
     Star,
     ShoppingBag,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function AdminLayout({ children }) {
+    const { logout } = useAuth(); // 3. Lấy hàm logout từ context
+    const navigate = useNavigate(); // 4. Khởi tạo navigate
+
     const menuItems = [
         { icon: <LayoutDashboard size={22} />, label: 'Dashboard', path: '/admin' },
         { icon: <Users size={22} />, label: 'Người dùng', path: '/quan-ly/nguoi-dung' },
@@ -21,6 +26,12 @@ function AdminLayout({ children }) {
         { icon: <ShoppingBag size={22} />, label: 'Đơn hàng', path: '/quan-ly/don-hang' },
         { icon: <Star size={22} />, label: 'Đánh giá', path: '/quan-ly/danh-gia' },
     ];
+
+    // 5. Hàm xử lý đăng xuất
+    const handleLogout = () => {
+        logout(); // Xóa user, token trong localStorage và cập nhật state
+        navigate('/dang-nhap'); // Chuyển hướng về trang đăng nhập
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -57,7 +68,11 @@ function AdminLayout({ children }) {
 
                 {/* Bottom Section - Cố định ở dưới */}
                 <div className="py-6 border-t border-gray-100">
-                    <button className="flex flex-col items-center justify-center gap-1 w-full text-red-400 hover:text-red-600 transition-all group">
+                    {/* 6. Gán hàm handleLogout vào sự kiện onClick */}
+                    <button
+                        onClick={handleLogout}
+                        className="flex flex-col items-center justify-center gap-1 w-full text-red-400 hover:text-red-600 transition-all group"
+                    >
                         <LogOut size={20} />
                         <span className="text-[10px] font-bold uppercase">Thoát</span>
                     </button>

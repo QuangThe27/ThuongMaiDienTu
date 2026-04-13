@@ -10,8 +10,13 @@ import {
     Store,
     TrendingUp,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function SellerLayout({ children }) {
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
     const menuItems = [
         { icon: <TrendingUp size={22} />, label: 'Thống Kê', path: '/seller' },
         { icon: <ClipboardList size={22} />, label: 'Đơn hàng', path: '/seller/don-hang' },
@@ -19,6 +24,11 @@ function SellerLayout({ children }) {
         { icon: <ShoppingBag size={22} />, label: 'Đánh giá', path: '/seller/danh-gia' },
         { icon: <MessageSquare size={22} />, label: 'Chat', path: '/seller/danh-sach-tin-nhan' },
     ];
+
+    const handleLogout = () => {
+        logout();
+        navigate('/dang-nhap');
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -54,9 +64,12 @@ function SellerLayout({ children }) {
 
                 {/* Bottom Section */}
                 <div className="py-6 border-t border-gray-100">
-                    <button className="flex flex-col items-center justify-center gap-1 w-full text-gray-400 hover:text-red-500 transition-all group">
+                    <button
+                        onClick={handleLogout}
+                        className="flex flex-col items-center justify-center gap-1 w-full text-gray-400 hover:text-red-500 transition-all group"
+                    >
                         <LogOut size={20} />
-                        <span className="text-[10px] font-bold uppercase">Đăng xuất</span>
+                        <span className="text-[10px] font-bold uppercase">Thoát</span>
                     </button>
                 </div>
             </aside>

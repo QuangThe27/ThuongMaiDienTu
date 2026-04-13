@@ -20,26 +20,22 @@ function Checkout() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Lấy dữ liệu từ Cart truyền sang hoặc mặc định là mảng rỗng
     const [cartItems, setCartItems] = useState(location.state?.items || []);
     const [loading, setLoading] = useState(false);
 
-    // Cloudinary URL từ biến môi trường
     const CLOUDINARY_URL = `${import.meta.env.VITE_CLOUDINARY_BASE_URL}${
         import.meta.env.VITE_CLOUDINARY_PRODUCT
     }`;
 
-    // State cho Form thông tin
     const [formData, setFormData] = useState({
         name: user?.name || '',
         email: user?.email || '',
         phone: user?.phone || '',
         address: user?.address || '',
         positioning: '',
-        payment_method: 0, // 0: COD, 1: Online
+        payment_method: 0,
     });
 
-    // Nếu người dùng F5 trang Checkout, fetch lại giỏ hàng từ API
     useEffect(() => {
         if (cartItems.length === 0 && user) {
             const fetchCart = async () => {
@@ -66,7 +62,6 @@ function Checkout() {
     const handleCheckout = async (e) => {
         e.preventDefault();
 
-        // Kiểm tra validate cơ bản
         if (!formData.phone || !formData.address) {
             alert('Vui lòng điền đầy đủ số điện thoại và địa chỉ nhận hàng!');
             return;
@@ -95,16 +90,29 @@ function Checkout() {
 
             const res = await createOrder(orderPayload);
 
-            if (res.success || res.status === 'success') {
+            console.log('Dữ liệu trả về từ API đặt hàng:', res);
+
+            const orderId =
+                res?.id || res?.data?.id || res?.orderId || res?.data?.orderId || res?.insertId;
+
+            if ((res.success || res.status === 'success') && orderId) {
+                console.log('Đang chuyển hướng tới đơn hàng ID:', orderId);
+                navigate(`/thong-tin-don-hang/${orderId}`);
+            } else if (res.success || res.status === 'success') {
+                console.error(
+                    'Đặt hàng thành công nhưng không tìm thấy ID trong response. Kiểm tra lại Backend.'
+                );
+                alert(
+                    'Đặt hàng thành công nhưng không lấy được mã đơn hàng. Vui lòng kiểm tra Lịch sử đơn hàng!'
+                );
                 navigate('/');
             } else {
                 alert(res.message || 'Có lỗi xảy ra, vui lòng thử lại.');
             }
+            // ---------------------------
         } catch (error) {
             console.error('Lỗi đặt hàng:', error);
-            alert(
-                error.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!'
-            );
+            alert(error.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng.');
         } finally {
             setLoading(false);
         }
@@ -126,7 +134,6 @@ function Checkout() {
     return (
         <div className="bg-white min-h-screen pt-32 pb-20">
             <div className="container mx-auto px-4 max-w-7xl">
-                {/* Header điều hướng */}
                 <div className="flex items-center justify-between mb-12 border-b-4 border-black pb-6">
                     <Link
                         to="/cart"
@@ -140,9 +147,7 @@ function Checkout() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    {/* PHẦN NHẬP THÔNG TIN */}
                     <div className="lg:col-span-7 space-y-10">
-                        {/* 1. Thông tin liên hệ */}
                         <section>
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="bg-black text-white w-8 h-8 flex items-center justify-center font-black">
@@ -251,7 +256,6 @@ function Checkout() {
                             </div>
                         </section>
 
-                        {/* 2. Phương thức thanh toán */}
                         <section>
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="bg-black text-white w-8 h-8 flex items-center justify-center font-black">
@@ -323,7 +327,6 @@ function Checkout() {
                         </section>
                     </div>
 
-                    {/* TÓM TẮT ĐƠN HÀNG */}
                     <div className="lg:col-span-5">
                         <div className="bg-gray-50 p-8 sticky top-32 border-t-8 border-sky-500 shadow-xl">
                             <h3 className="text-2xl font-black uppercase italic mb-8 border-b-2 border-gray-200 pb-4 tracking-tighter">

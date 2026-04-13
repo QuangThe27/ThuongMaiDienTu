@@ -11,7 +11,7 @@ export const getProductById = async (id) => {
 };
 
 export const getProductsByStore = async (storeId) => {
-    const response = await apiClient.get(`/products/store/${storeId}`); 
+    const response = await apiClient.get(`/products/store/${storeId}`);
     return response.data;
 };
 
@@ -40,5 +40,10 @@ export const deleteProduct = async (id) => {
 
 export const getProductsByCategory = async (categoryId) => {
     const response = await publicClient.get(`/products/category/${categoryId}`);
+    return response.data;
+};
+
+export const getBestSeller = async () => {
+    const response = await publicClient.get('/products/best-seller');
     return response.data;
 };

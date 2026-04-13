@@ -1,4 +1,5 @@
 const OrderModel = require('./order.model');
+const { db } = require('../../config/database');
 
 const getAllOrders = async () => await OrderModel.findAll();
 
@@ -15,10 +16,47 @@ const createOrder = async (orderData, items) => {
     return await OrderModel.create(orderData, items);
 };
 
-const deleteOrder = async (id) => {
-    const success = await OrderModel.deleteById(id);
-    if (!success) throw new Error('Xóa đơn hàng thất bại hoặc đơn hàng không tồn tại.');
-    return success;
+const deleteOrder = async (orderId) => {
+    // Sử dụng connection từ pool để chạy Transaction
+    const connection = await db.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        // 1. Lấy danh sách sản phẩm (items) của đơn hàng để biết số lượng cần hoàn trả
+        const [items] = await connection.query(
+            'SELECT variant_id, quantity FROM order_items WHERE order_id = ?',
+            [orderId]
+        );
+
+        // 2. Cộng lại số lượng vào kho (product_variants)
+        for (const item of items) {
+            if (item.variant_id) {
+                await connection.query(
+                    'UPDATE product_variants SET quantity = quantity + ? WHERE id = ?',
+                    [item.quantity, item.variant_id]
+                );
+            }
+        }
+
+        // 3. Xóa đơn hàng
+        // (Do có ON DELETE CASCADE nên order_items sẽ tự động bị xóa theo)
+        const [result] = await connection.query('DELETE FROM orders WHERE id = ?', [orderId]);
+
+        if (result.affectedRows === 0) {
+            throw new Error('Đơn hàng không tồn tại.');
+        }
+
+        // Hoàn tất mọi thay đổi
+        await connection.commit();
+        return true;
+    } catch (error) {
+        // Nếu có bất kỳ lỗi nào, hủy bỏ toàn bộ thay đổi
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 };
 
 const getOrderStoreById = async (orderId, storeId) => {

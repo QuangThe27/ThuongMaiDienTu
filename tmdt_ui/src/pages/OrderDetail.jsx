@@ -333,17 +333,21 @@ function OrderDetail() {
                                     </p>
                                 </div>
 
-                                {item.isReview === 0 ? (
-                                    <button
-                                        onClick={() => openReviewModal(item)}
-                                        className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 text-[10px] font-black uppercase hover:bg-black transition-all"
-                                    >
-                                        <MessageSquare size={14} /> Viết đánh giá
-                                    </button>
-                                ) : (
+                                {item.isReview === 1 ? (
+                                    // Trường hợp 1: Đã đánh giá rồi
                                     <span className="text-[10px] font-black uppercase text-green-500 bg-green-50 px-3 py-1">
                                         Đã đánh giá
                                     </span>
+                                ) : (
+                                    // Trường hợp 2: Chưa đánh giá -> Kiểm tra xem đơn hàng đã giao thành công (status = 3) chưa
+                                    order.status === 3 && (
+                                        <button
+                                            onClick={() => openReviewModal(item)}
+                                            className="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 text-[10px] font-black uppercase hover:bg-black transition-all"
+                                        >
+                                            <MessageSquare size={14} /> Viết đánh giá
+                                        </button>
+                                    )
                                 )}
                             </div>
                         </div>
