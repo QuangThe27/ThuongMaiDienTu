@@ -23,6 +23,11 @@ const initSocket = (server) => {
             socket.join(roomName);
         });
 
+        socket.on('join_store_lobby', (storeId) => {
+            socket.join(`store_lobby_${storeId}`);
+            console.log(`Store ${storeId} joined lobby`);
+        });
+
         socket.on('send_message', async (data) => {
             try {
                 const newMessage = await ChatService.createChat({
@@ -31,8 +36,12 @@ const initSocket = (server) => {
                     sender_type: data.senderType,
                     message: data.message,
                 });
+
                 const roomName = `room_${data.userId}_${data.storeId}`;
                 io.to(roomName).emit('receive_message', newMessage);
+
+                // Gửi thông báo đến Lobby của Store để cập nhật danh sách hội thoại
+                io.to(`store_lobby_${data.storeId}`).emit('new_conversation_update', newMessage);
             } catch (error) {
                 console.error('Socket error:', error.message);
             }

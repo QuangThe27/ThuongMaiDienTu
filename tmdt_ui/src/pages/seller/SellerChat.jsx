@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import SellerHeader from '../../components/SellerHeader';
 import { MessageSquare, User, Loader2, X, Circle } from 'lucide-react';
-import { getConversations } from '../../services/chatService';
+import { getConversations, markAsRead } from '../../services/chatService'; // Import service mới
 import { getStoreByUserId } from '../../services/storeService';
 import { useAuth } from '../../contexts/AuthContext';
 import Notification from '../../components/Notification';
 import ChatBox from '../../components/ChatBox';
+import socket from '../../socket';
 
 function SellerChat() {
     const { user } = useAuth();
@@ -24,6 +25,15 @@ function SellerChat() {
         setTimeout(() => setNotification(null), 3000);
     };
 
+    const fetchConversations = async (storeId) => {
+        try {
+            const result = await getConversations(storeId);
+            setConversations(result.data || []);
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+        }
+    };
+
     useEffect(() => {
         const initData = async () => {
             if (!user?.id) return;
@@ -34,19 +44,75 @@ function SellerChat() {
 
                 if (storeData && storeData.id) {
                     setStoreInfo(storeData);
-                    const result = await getConversations(storeData.id);
-                    setConversations(result.data || []);
-                } else {
-                    showNotify('Không tìm thấy thông tin cửa hàng.', 'error');
+                    await fetchConversations(storeData.id);
+                    socket.emit('join_store_lobby', storeData.id);
                 }
             } catch {
-                showNotify('Lỗi khi tải danh sách tin nhắn.', 'error');
+                showNotify('Lỗi khi tải dữ liệu.', 'error');
             } finally {
                 setLoading(false);
             }
         };
         initData();
     }, [user?.id]);
+
+    useEffect(() => {
+        socket.on('new_conversation_update', (newMessage) => {
+            setConversations((prev) => {
+                const existingIdx = prev.findIndex((c) => c.user_id === newMessage.user_id);
+                let updatedList = [...prev];
+                const sType = Number(newMessage.sender_type);
+
+                if (existingIdx !== -1) {
+                    const updatedConv = {
+                        ...updatedList[existingIdx],
+                        last_message: newMessage.message,
+                        last_time: newMessage.created_at,
+                        sender_type: sType,
+                        is_read: 0,
+                    };
+                    updatedList.splice(existingIdx, 1);
+                    updatedList.unshift(updatedConv);
+                } else {
+                    if (storeInfo?.id) fetchConversations(storeInfo.id);
+                }
+                return updatedList;
+            });
+        });
+        return () => socket.off('new_conversation_update');
+    }, [storeInfo?.id]);
+
+    const handleOpenChat = async (conv) => {
+        setSelectedUser(conv);
+
+        // Cập nhật CSDL thông qua Service nếu tin nhắn đang ở trạng thái chưa đọc
+        if (conv.is_read === 0) {
+            try {
+                // Cập nhật UI ngay lập tức (Optimistic Update)
+                setConversations((prev) =>
+                    prev.map((item) =>
+                        item.user_id === conv.user_id ? { ...item, is_read: 1 } : item
+                    )
+                );
+
+                // Gọi Service để lưu vào CSDL
+                await markAsRead(conv.user_id, storeInfo.id);
+            } catch (error) {
+                console.error('Lỗi cập nhật CSDL:', error);
+                // Nếu lỗi thì nên fetch lại danh sách để đảm bảo tính đúng đắn
+                fetchConversations(storeInfo.id);
+            }
+        }
+    };
+
+    const isNewMessage = (conv) => {
+        const sType = Number(conv.sender_type);
+        // Theo yêu cầu: sender_type = 1 (Store) thì check is_read, sender_type = 2 mặc định đã đọc (false)
+        if (sType === 1) {
+            return conv.is_read === 0;
+        }
+        return false;
+    };
 
     return (
         <div className="animate-fade-in relative">
@@ -102,87 +168,88 @@ function SellerChat() {
                                     </td>
                                 </tr>
                             ) : (
-                                conversations.map((conv, index) => (
-                                    <tr
-                                        key={conv.user_id}
-                                        className={`hover:bg-orange-50/20 transition-colors ${
-                                            conv.is_read === 0 ? 'bg-blue-50/30' : ''
-                                        }`}
-                                    >
-                                        <td className="p-4 text-sm text-center text-gray-400 font-medium">
-                                            {index + 1}
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <div className="w-12 h-12 mx-auto rounded-full bg-gray-50 overflow-hidden border border-gray-100 flex items-center justify-center">
-                                                {conv.user_avatar ? (
-                                                    <img
-                                                        src={`${CLOUDINARY_AVATAR}/${conv.user_avatar}`}
-                                                        className="w-full h-full object-cover"
-                                                        alt=""
-                                                    />
+                                conversations.map((conv, index) => {
+                                    const hasNew = isNewMessage(conv);
+                                    return (
+                                        <tr
+                                            key={conv.user_id}
+                                            className={`hover:bg-orange-50/20 transition-colors ${
+                                                hasNew ? 'bg-orange-50/40' : ''
+                                            }`}
+                                        >
+                                            <td className="p-4 text-sm text-center text-gray-400 font-medium">
+                                                {index + 1}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <div className="w-12 h-12 mx-auto rounded-full bg-gray-50 overflow-hidden border border-gray-100 flex items-center justify-center">
+                                                    {conv.user_avatar ? (
+                                                        <img
+                                                            src={`${CLOUDINARY_AVATAR}/${conv.user_avatar}`}
+                                                            className="w-full h-full object-cover"
+                                                            alt=""
+                                                        />
+                                                    ) : (
+                                                        <User className="text-gray-300" size={20} />
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <span
+                                                    className={`font-bold ${
+                                                        hasNew ? 'text-gray-900' : 'text-gray-600'
+                                                    }`}
+                                                >
+                                                    {conv.user_name}
+                                                </span>
+                                            </td>
+                                            <td className="p-4">
+                                                <p
+                                                    className={`text-sm truncate max-w-[200px] ${
+                                                        hasNew
+                                                            ? 'font-bold text-gray-900'
+                                                            : 'text-gray-500'
+                                                    }`}
+                                                >
+                                                    {conv.last_message}
+                                                </p>
+                                            </td>
+                                            <td className="p-4 text-center text-sm text-gray-500 font-medium">
+                                                {new Date(conv.last_time).toLocaleDateString(
+                                                    'vi-VN'
+                                                )}
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                {hasNew ? (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 animate-pulse">
+                                                        <Circle className="w-2 h-2 mr-1.5 fill-current" />{' '}
+                                                        Mới
+                                                    </span>
                                                 ) : (
-                                                    <User className="text-gray-300" size={20} />
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                        Đã đọc
+                                                    </span>
                                                 )}
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span
-                                                className={`font-bold ${
-                                                    conv.is_read === 0
-                                                        ? 'text-blue-600'
-                                                        : 'text-gray-800'
-                                                }`}
-                                            >
-                                                {conv.user_name}
-                                            </span>
-                                        </td>
-                                        <td className="p-4">
-                                            <p
-                                                className={`text-sm truncate max-w-[200px] ${
-                                                    conv.is_read === 0
-                                                        ? 'font-bold text-gray-900'
-                                                        : 'text-gray-500'
-                                                }`}
-                                            >
-                                                {conv.last_message}
-                                            </p>
-                                        </td>
-                                        <td className="p-4 text-center text-sm text-gray-500 font-medium">
-                                            {new Date(conv.last_time).toLocaleDateString('vi-VN')}
-                                        </td>
-                                        {/* Cột Trạng thái mới */}
-                                        <td className="p-4 text-center">
-                                            {conv.is_read === 0 ? (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    <Circle className="w-2 h-2 mr-1.5 fill-current" />
-                                                    Mới
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                                                    Đã đọc
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <button
-                                                onClick={() => setSelectedUser(conv)}
-                                                className="p-2.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all relative"
-                                            >
-                                                <MessageSquare size={20} />
-                                                {conv.is_read === 0 && (
-                                                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                                                )}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="p-4 text-center">
+                                                <button
+                                                    onClick={() => handleOpenChat(conv)}
+                                                    className="p-2.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all relative"
+                                                >
+                                                    <MessageSquare size={20} />
+                                                    {hasNew && (
+                                                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                                    )}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {/* ChatBox Overlay */}
             {selectedUser && storeInfo && (
                 <div className="fixed bottom-4 right-4 z-[100] w-[380px] shadow-2xl animate-slide-up">
                     <div className="relative group">

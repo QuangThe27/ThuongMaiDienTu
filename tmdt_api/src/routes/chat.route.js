@@ -5,7 +5,9 @@ const ChatController = require('../modules/chat/chat.controller');
 
 router.get('/', authMiddleware, ChatController.getAll);
 router.get('/room/:userId/:storeId', authMiddleware, ChatController.getChatRoom);
-// List chat user và store
 router.get('/conversations/:storeId', authMiddleware, ChatController.getConversations);
+
+// --- BỔ SUNG ROUTE NÀY ---
+router.patch('/read/:userId/:storeId', authMiddleware, ChatController.markAsRead);
 
 module.exports = router;

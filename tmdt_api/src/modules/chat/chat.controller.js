@@ -29,4 +29,17 @@ const getConversations = async (req, res) => {
     }
 };
 
-module.exports = { getAll, getChatRoom, getConversations };
+const markAsRead = async (req, res) => {
+    try {
+        const { userId, storeId } = req.params;
+
+        // Gọi qua Service đã sửa ở trên
+        await ChatService.markAsRead(userId, storeId);
+
+        res.json({ success: true, message: 'Đã đánh dấu tất cả tin nhắn từ khách hàng là đã đọc' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { getAll, getChatRoom, getConversations, markAsRead };

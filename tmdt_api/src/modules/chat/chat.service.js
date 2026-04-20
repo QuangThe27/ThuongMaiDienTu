@@ -14,8 +14,13 @@ const getDetailRoom = async (userId, storeId) => {
 };
 
 const getStoreConversations = async (storeId) => {
-    if (!storeId) throw new Error("Store ID không hợp lệ");
+    if (!storeId) throw new Error('Store ID không hợp lệ');
     return await ChatModel.findConversationsByStore(storeId);
 };
 
-module.exports = { getAll, createChat, getDetailRoom, getStoreConversations };
+const markAsRead = async (userId, storeId) => {
+    if (!userId || !storeId) throw new Error('Thiếu thông tin để cập nhật trạng thái');
+    return await ChatModel.markAsRead(userId, storeId);
+};
+
+module.exports = { getAll, createChat, getDetailRoom, getStoreConversations, markAsRead };
